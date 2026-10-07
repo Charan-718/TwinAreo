@@ -1,0 +1,22 @@
+{
+  "dataset": "NASA C-MAPSS FD004",
+  "train_engines": 249,
+  "test_engines": 248,
+  "operating_conditions": 6,
+  "fault_modes": [
+    "High-Pressure Compressor (HPC) Degradation",
+    "Fan Degradation"
+  ],
+  "metrics": {
+    "train_rmse": 13.74,
+    "train_mae": 9.29,
+    "test_rmse": 18.8,
+    "test_mae": 13.59,
+    "nasa_score": 2665.8,
+    "mean_nasa_score": 10.75,
+    "target_coverage_pct": 90.0,
+    "empirical_coverage_pct": 76.61,
+    "mpiw_cycles": 41.16,
+    "coverage_valid": false
+  }
+}

@@ -8,3 +8,8 @@ build/
 __pycache__/
 *.pyc
 .venv/
+data/raw/*.txt
+data/raw/*.pdf
+data/raw/*.zip
+data/processed/
+*.joblib
