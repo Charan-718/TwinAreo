@@ -1,128 +1,137 @@
 """
-TwinAero - Agentic Reasoning & AI Maintenance Advisor Layer
-Orchestrates Observation -> Fault Diagnosis -> Uncertainty Evaluation ->
-Counterfactual Analysis -> Prescriptive Maintenance Actions.
+TwinAero - Agentic maintenance decision support
+
+A deterministic orchestration of specialized agents. Each agent reads the shared
+engine state, adds a finding to the trace, and hands over to the next:
+
+    Observer -> Diagnosis -> Prognosis -> Calibration -> Scenario -> Planner
+
+Determinism is deliberate: the same inputs always produce the same recommendation,
+which makes decision consistency measurable (see ml/experiments). The planner's
+policy is exposed as `decide()` so the experiments evaluate exactly what the UI shows.
+
+This is research decision support on simulated data. It is not an airworthiness
+determination and does not reference real maintenance programmes.
 """
 
-from typing import Dict, Any, List
+from typing import Any, Callable, Dict, List, Optional
+
+REMOVE_AT = 20    # plan removal / shop visit when the decision RUL is at or below this
+INSPECT_AT = 50   # schedule inspection when the decision RUL is at or below this
+
+ACTIONS = {
+    'REMOVE': 'Plan removal for shop visit',
+    'INSPECT': 'Schedule on-wing inspection',
+    'CONTINUE': 'Continue routine monitoring',
+}
 
 
-class AIAirworthinessAdvisor:
-    """
-    Intelligent Agentic Reasoning Layer providing aerospace engineering decision support.
-    """
+def _cycles(n: float) -> str:
+    n = int(n)
+    return f"{n} cycle" if n == 1 else f"{n} cycles"
 
+
+def _sentence_case(label: str) -> str:
+    """Lowercase only a leading capital, keeping acronyms such as HPC intact."""
+    return label[0].lower() + label[1:] if label[:2].istitle() else label
+
+
+def decide(decision_rul: float, remove_at: float = REMOVE_AT, inspect_at: float = INSPECT_AT) -> str:
+    if decision_rul <= remove_at:
+        return 'REMOVE'
+    if decision_rul <= inspect_at:
+        return 'INSPECT'
+    return 'CONTINUE'
+
+
+class MaintenanceAdvisor:
     def generate_assessment(
         self,
-        engine_id: int,
-        cycle: int,
-        health_pct: float,
-        status: str,
-        rul_pred: float,
-        rul_interval: Dict[str, float],
-        fault_diagnosis: Dict[str, Any],
-        drift_status: Dict[str, Any],
-        operating_regime: int = 4
+        engine: Dict[str, Any],
+        scenario_runner: Optional[Callable[[float, float, float], Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
-        """
-        Synthesizes state into a structured agentic reasoning audit and prescriptive action plan.
-        """
-        fault_mode = fault_diagnosis.get('fault_mode', 'NORMAL_HEALTHY')
-        rul_low = rul_interval.get('lower', max(0, rul_pred - 7))
-        rul_high = rul_interval.get('upper', rul_pred + 7)
-        confidence = fault_diagnosis.get('confidence', 0.92)
+        trace: List[Dict[str, Any]] = []
+        e = engine
+        cycle = e['total_cycles_observed']
 
-        # 1. Observation Synthesis
-        observations = []
-        if fault_diagnosis.get('anomalies'):
-            for a in fault_diagnosis['anomalies']:
-                observations.append(f"Observed {a['severity']} anomaly in {a['component']}: {a['description']}.")
-        else:
-            observations.append(f"All 21 telemetry channels operating within nominal standard deviations for Flight Regime {operating_regime}.")
+        # 1. Observer
+        anomaly = e.get('anomaly', {})
+        obs = [f"{cycle} cycles observed; latest operating condition is regime {e['operating_regime']} ({e['regime_name']})."]
+        if anomaly.get('score') is not None:
+            state = 'above' if anomaly['alarm'] else 'below'
+            obs.append(f"Healthy-state distance {anomaly['score']:.1f} is {state} the alarm threshold {anomaly['threshold']:.1f}.")
+        trace.append({'agent': 'Observer', 'finding': ' '.join(obs)})
 
-        # 2. Diagnostic Hypothesis
-        if fault_mode == 'HPC_DEGRADATION':
-            diagnostic_summary = (
-                f"High-Pressure Compressor (HPC) aerothermal degradation confirmed. "
-                f"Elevated T30 (+{fault_diagnosis.get('hpc_score', 1.0):.2f}σ) combined with static pressure loss Ps30 indicates "
-                f"progressive blade tip clearance growth and thermal barrier coating (TBC) degradation."
-            )
-            root_cause = "HPC Stage 4-7 rotor blade tip erosion and stator seal clearance degradation."
-            urgency = "HIGH" if rul_pred < 40 else "MODERATE"
-        elif fault_mode == 'FAN_DEGRADATION':
-            diagnostic_summary = (
-                f"Fan module mechanical degradation detected. "
-                f"Bypass ratio shift accompanied by rotational drift indicates "
-                f"fan blade aerodynamic surface fouling and inlet guide vane perturbation."
-            )
-            root_cause = "Fan blade leading edge roughness and acoustic lining boundary layer distortion."
-            urgency = "HIGH" if rul_pred < 40 else "MODERATE"
-        elif fault_mode == 'COMBINED_DEGRADATION':
-            diagnostic_summary = (
-                "Compound degradation: Both High-Pressure Compressor and Fan subsystems exhibit coincident wear patterns."
-            )
-            root_cause = "Multi-module thermodynamic degradation across both core and bypass gas paths."
-            urgency = "CRITICAL" if rul_pred < 35 else "HIGH"
+        # 2. Diagnosis
+        if e['fault_mode'] == 'NO_CLEAR_SIGNATURE':
+            diag = 'Sensor shifts are still small; no fault mode can be attributed yet.'
         else:
-            diagnostic_summary = "Engine thermal and mechanical parameters reflect nominal state."
-            root_cause = "Normal operational wear accumulation; no uncontained degradation observed."
-            urgency = "LOW"
+            conf = e.get('fault_confidence')
+            conf_txt = f' (separation {conf:.2f})' if conf is not None else ''
+            diag = f"Degradation signature is closest to {_sentence_case(e['fault_label'])}{conf_txt}."
+        shifted = [a['component'].replace('sensor_', 'sensor ') for a in e.get('active_anomalies', [])]
+        if shifted:
+            diag += f" Largest shifts: {', '.join(shifted)}."
+        trace.append({'agent': 'Diagnosis', 'finding': diag})
 
-        # 3. Airworthiness Action Plan
-        if status == 'CRITICAL' or rul_pred < 25:
-            action_code = "AOG-RISK-IMMINENT"
-            recommended_action = (
-                f"GROUND ENGINE / SCHEDULE SHOP VISIT: Ground engine FD004-{engine_id} within {int(rul_low)} flight cycles. "
-                f"Perform comprehensive borescope inspection of core compressors and swap engine unit prior to cycle {int(cycle + rul_low)}."
-            )
-            dispatch_status = "RESTRICTED - FERRY FLIGHT ONLY"
-            airworthiness_risk = "CRITICAL"
-        elif status == 'MONITOR' or rul_pred < 65:
-            action_code = "MSG3-SCHEDULED-INSPECTION"
-            recommended_action = (
-                f"SCHEDULE LINE MAINTENANCE: Schedule on-wing borescope inspection (MSG-3 Task 72-30-01) within {int(rul_pred * 0.6)} cycles. "
-                f"Apply 3.5% thrust derate on high-ambient takeoffs to preserve hot section life."
-            )
-            dispatch_status = "DISPATCHABLE WITH MONITORING"
-            airworthiness_risk = "MODERATE"
-        else:
-            action_code = "NOMINAL-ROUTINE-CHECK"
-            recommended_action = "CONTINUE STANDARD LINE SERVICE: Engine airworthy for standard long-haul dispatch."
-            dispatch_status = "FULLY DISPATCHABLE"
-            airworthiness_risk = "NOMINAL"
+        # 3. Prognosis
+        iv = e['intervals']
+        trace.append({'agent': 'Prognosis', 'finding': (
+            f"Predicted RUL {e['rul_pred']:.0f} cycles; 90% interval {iv['0.9']['lower']:.0f}-{iv['0.9']['upper']:.0f}, "
+            f"95% interval {iv['0.95']['lower']:.0f}-{iv['0.95']['upper']:.0f}.")})
 
-        # 4. Self-Calibration & Drift Note
-        if drift_status.get('drift_detected'):
-            calibration_note = (
-                f"Covariate drift detected (score: {drift_status.get('drift_score')}). "
-                f"Digital Twin self-calibration active: sensor baselines recalibrated at cycle {drift_status.get('last_calibrated_cycle', cycle)}."
-            )
+        # 4. Calibration
+        drift = e['drift_status']
+        level = '0.95' if drift.get('drift_detected') else '0.9'
+        if drift.get('drift_detected'):
+            cal = (f"Twin discrepancy {drift['drift_score']:.2f} exceeds threshold {drift['threshold']:.2f}. "
+                   'Switching decisions to the 95% lower bound.')
+        elif drift.get('drift_score') is None:
+            cal = 'Too few cycles to test for twin discrepancy; using the 90% lower bound.'
         else:
-            calibration_note = "Digital Twin state strictly synchronized with engine telemetry. Residuals zero-mean calibrated."
+            cal = f"Twin discrepancy {drift['drift_score']:.2f} is within threshold {drift['threshold']:.2f}; using the 90% lower bound."
+        trace.append({'agent': 'Calibration', 'finding': cal})
+        decision_rul = iv[level]['lower']
+
+        # 5. Scenario
+        scenario_note = None
+        if scenario_runner is not None:
+            cur = e['current_settings']
+            derate = scenario_runner(cur['altitude_kft'], cur['mach_number'], max(60.0, cur['throttle_pct'] - 10.0))
+            scenario_note = (f"A 10-point throttle derate changes modeled RUL by {derate['rul_delta']:+.0f} cycles "
+                             f"(assumption-based surrogate).")
+            trace.append({'agent': 'Scenario', 'finding': scenario_note})
+
+        # 6. Planner
+        action = decide(decision_rul)
+        point_action = decide(e['rul_pred'])
+        if action == 'REMOVE':
+            plan = f"Plan removal within {_cycles(max(0, decision_rul))}."
+        elif action == 'INSPECT':
+            plan = f"Inspect within {_cycles(max(1, decision_rul - REMOVE_AT))}, before the conservative bound reaches {REMOVE_AT}."
+        else:
+            plan = f"Re-assess when the conservative bound reaches {INSPECT_AT} cycles."
+        if point_action != action:
+            plan += f" The point estimate alone would suggest '{ACTIONS[point_action].lower()}'; the interval is more cautious."
+        trace.append({'agent': 'Planner', 'finding': plan})
 
         return {
-            'agent_id': f'TwinAero-Reasoning-Agent-FD004-{engine_id}',
+            'engine_id': e['engine_id'],
             'timestamp_cycle': cycle,
-            'diagnostic_summary': diagnostic_summary,
-            'root_cause': root_cause,
-            'urgency': urgency,
-            'airworthiness_risk': airworthiness_risk,
-            'dispatch_status': dispatch_status,
-            'action_code': action_code,
-            'recommended_action': recommended_action,
-            'rul_assessment': {
-                'point_estimate': round(rul_pred, 1),
-                'confidence_interval_90': f"[{round(rul_low, 1)} - {round(rul_high, 1)}] cycles",
-                'safe_dispatch_limit': max(1, int(rul_low * 0.8)),
+            'action_code': action,
+            'recommended_action': ACTIONS[action],
+            'plan': plan,
+            'decision_basis': {
+                'confidence_level': float(level),
+                'decision_rul': round(decision_rul, 1),
+                'point_estimate': e['rul_pred'],
+                'point_estimate_action': point_action,
+                'thresholds': {'remove_at': REMOVE_AT, 'inspect_at': INSPECT_AT},
             },
-            'calibration_note': calibration_note,
-            'observations': observations,
-            'decision_tree_path': [
-                f"Cycle {cycle} Sensor Stream Ingested",
-                f"Flight Regime {operating_regime} Standardized",
-                f"Health Index evaluated at {health_pct}%",
-                f"Fault Classifier resolved {fault_mode}",
-                f"Conformal Uncertainty computed bounds [{round(rul_low, 1)}, {round(rul_high, 1)}]",
-                f"Prescriptive action formulated: {action_code}"
-            ]
+            'diagnostic_summary': diag,
+            'calibration_note': cal,
+            'scenario_note': scenario_note,
+            'observations': obs,
+            'trace': trace,
+            'disclaimer': 'Research decision support on simulated C-MAPSS data. Not an airworthiness determination.',
         }

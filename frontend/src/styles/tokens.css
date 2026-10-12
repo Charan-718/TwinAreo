@@ -1,0 +1,200 @@
+/*
+ * TwinAero design tokens
+ *
+ * Components consume semantic names only (--color-surface, --color-text-muted ...).
+ * Palette intent: a warm instrument-panel neutral as the 60% foundation, layered
+ * surfaces and hairline borders as the 30%, and a single petrol primary as the 10%
+ * accent for actions, selection and focus. Status hues are reserved for state and
+ * always ship with a text label.
+ *
+ * Type scale: steps of sqrt(phi) ~ 1.272, so every second step is the golden ratio
+ * (16 -> 25.9 -> 41.9). Two pragmatic steps below the base (14, 12.6) serve dense
+ * tables and labels; nothing renders smaller than 12px.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Foundation */
+  --color-bg: #f3f2ee;
+  --color-surface: #fbfaf8;
+  --color-surface-elevated: #fefdfb;
+  --color-surface-interactive: #eceae5;
+  --color-surface-sunken: #efede8;
+
+  /* Text */
+  --color-text-primary: #1c1f23;
+  --color-text-secondary: #4a4f57;
+  --color-text-muted: #656a73;
+  --color-text-inverse: #fbfaf8;
+
+  /* Borders */
+  --color-border: #dcd9d2;
+  --color-border-subtle: #e7e4de;
+  --color-border-strong: #b5b1a8;
+
+  /* Brand */
+  --color-primary: #1f5c66;
+  --color-primary-hover: #184b54;
+  --color-primary-active: #123b42;
+  --color-primary-soft: #dde9ea;
+  --color-primary-text: #1a525b;
+  --color-on-primary: #fbfaf8;
+
+  /* Accent (used sparingly: the one highlighted series or comparison) */
+  --color-accent: #9c4f22;
+  --color-accent-hover: #843f16;
+  --color-accent-soft: #f3e4d9;
+
+  /* Semantic */
+  --color-success: #2b7149;
+  --color-success-soft: #e1efe6;
+  --color-warning: #8a5800;
+  --color-warning-soft: #f5ebd5;
+  --color-error: #a8332a;
+  --color-error-soft: #f6e1de;
+  --color-info: #355b8a;
+  --color-info-soft: #e2e9f2;
+
+  /* Focus */
+  --color-focus: #1f5c66;
+
+  /* Charts (validated categorical slots 1-3, dataviz reference palette) */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-grid: #e6e3dc;
+  --chart-axis: #c3c0b7;
+  --chart-band-opacity: 0.16;
+
+  /* Typography */
+  --font-family-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-family-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --font-size-xs: 0.786rem;   /* 12.6px  base / sqrt(phi) */
+  --font-size-sm: 0.875rem;   /* 14px    dense UI text    */
+  --font-size-base: 1rem;     /* 16px                     */
+  --font-size-lg: 1.272rem;   /* 20.4px  base * sqrt(phi) */
+  --font-size-xl: 1.618rem;   /* 25.9px  base * phi       */
+  --font-size-2xl: 2.058rem;  /* 32.9px                   */
+  --font-size-3xl: 2.618rem;  /* 41.9px  base * phi^2     */
+  --font-size-display: clamp(2.058rem, 1.6rem + 2vw, 3.33rem);
+  --font-size-page-title: clamp(1.4rem, 1.2rem + 0.9vw, 2.058rem);
+  --font-size-metric: clamp(2.058rem, 1.7rem + 1.4vw, 2.618rem);
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  --line-height-tight: 1.15;
+  --line-height-snug: 1.3;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.618;
+
+  --letter-spacing-tight: -0.015em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-label: 0.02em;
+
+  --measure: 68ch;
+
+  /* Spacing (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Radius: deliberately tight, instrument-panel geometry */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-full: 9999px;
+
+  /* Elevation: borders carry most depth; shadows only for floating layers */
+  --shadow-xs: 0 1px 0 rgb(28 31 35 / 0.04);
+  --shadow-sm: 0 1px 2px rgb(28 31 35 / 0.06);
+  --shadow-md: 0 4px 12px rgb(28 31 35 / 0.08), 0 1px 2px rgb(28 31 35 / 0.06);
+  --shadow-lg: 0 12px 32px rgb(28 31 35 / 0.12);
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-normal: 180ms;
+  --duration-slow: 280ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+
+  /* Layout */
+  --header-height: 3.5rem;
+  --sidebar-width: 15rem;
+  --container-max: 80rem;
+  --container-prose: 46rem;
+  --gutter: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  :root { --gutter: var(--space-6); }
+}
+@media (min-width: 1280px) {
+  :root { --gutter: var(--space-8); }
+}
+
+/* Dark theme: its own layered system, not an inversion */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #111315;
+  --color-surface: #181b1e;
+  --color-surface-elevated: #1f2327;
+  --color-surface-interactive: #272c31;
+  --color-surface-sunken: #141618;
+  --color-text-primary: #e8e6e1;
+  --color-text-secondary: #b6b3ac;
+  --color-text-muted: #8f8c86;
+  --color-text-inverse: #111315;
+  --color-border: #2d3237;
+  --color-border-subtle: #23272b;
+  --color-border-strong: #424950;
+  --color-primary: #6fb3bc;
+  --color-primary-hover: #87c3cb;
+  --color-primary-active: #5aa0a9;
+  --color-primary-soft: #1b3236;
+  --color-primary-text: #8cc5cd;
+  --color-on-primary: #0d1a1c;
+  --color-accent: #e0956a;
+  --color-accent-hover: #eaa982;
+  --color-accent-soft: #33231a;
+  --color-success: #6cbf8f;
+  --color-success-soft: #172a1f;
+  --color-warning: #dcab4c;
+  --color-warning-soft: #2e2514;
+  --color-error: #e5796d;
+  --color-error-soft: #341d1a;
+  --color-info: #8aafdc;
+  --color-info-soft: #1a2433;
+  --color-focus: #87c3cb;
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-grid: #262a2e;
+  --chart-axis: #3a3f45;
+  --chart-band-opacity: 0.22;
+  --shadow-xs: 0 1px 0 rgb(0 0 0 / 0.3);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 6px 16px rgb(0 0 0 / 0.45);
+  --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+  }
+}

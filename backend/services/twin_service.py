@@ -1,334 +1,322 @@
 """
-TwinAero - Digital Twin Orchestration Service
-Coordinates telemetry streaming, RUL prediction, conformal uncertainty bounds,
-anomaly diagnostics, drift self-calibration, and counterfactual simulation.
+TwinAero - Digital Twin orchestration service
+
+Loads the artifacts written by ml/train_and_evaluate.py, replays the FD004 test fleet
+through every component once at startup (RUL, conformal intervals, anomaly score,
+fault-mode hypothesis, twin-discrepancy check), and serves per-engine views from that
+cache. Everything the API returns is computed from data and fitted models; no value is
+hard-coded for display.
 """
 
+import json
 import os
 import sys
-import json
+from typing import Any, Dict, List, Optional
+
+import joblib
 import numpy as np
 import pandas as pd
-from typing import Dict, Any, List, Optional
 
-# Ensure project root is importable
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from ml.preprocessing.loader import CMAPSSDataLoader, SENSOR_METADATA, SETTING_METADATA, ACTIVE_SENSORS
-from ml.rul.predictor import RULPredictor
-from ml.uncertainty.conformal import ConformalPredictor
+from ml.agent.advisor import MaintenanceAdvisor, decide
 from ml.anomaly.fault_classifier import FaultClassifier
-from ml.drift.detector import DriftDetector
+from ml.anomaly.health_monitor import HealthStateMonitor
 from ml.digital_twin.counterfactual import CounterfactualSimulator
-from ml.agent.advisor import AIAirworthinessAdvisor
+from ml.drift.detector import DriftDetector
+from ml.preprocessing.loader import (
+    ACTIVE_SENSORS, SENSOR_COLS, SENSOR_METADATA, CMAPSSDataLoader, build_twin_features,
+)
+from ml.rul.predictor import RULPredictor
+from ml.uncertainty.conformal import CONFIDENCE_LEVELS, CQRPredictor
 
+MODELS_DIR = os.path.join(PROJECT_ROOT, 'ml/models')
+DATA_DIR = os.path.join(PROJECT_ROOT, 'data/raw')
 
+# Operating-condition centers of FD004 (setting_1 altitude kft, setting_2 Mach, setting_3 TRA).
 REGIME_NAMES = {
-    0: "Sea Level Takeoff / Static",
-    1: "Low Altitude Initial Climb",
-    2: "Mid Altitude Cruise",
-    3: "Descent / Partial Throttle",
-    4: "High Altitude Cruise",
-    5: "Max Altitude Flight Ceiling"
+    0: 'Sea level, TRA 100',
+    1: '10 kft, Mach 0.25, TRA 100',
+    2: '20 kft, Mach 0.70, TRA 100',
+    3: '25 kft, Mach 0.62, TRA 60',
+    4: '35 kft, Mach 0.84, TRA 100',
+    5: '42 kft, Mach 0.84, TRA 100',
 }
+
+LEVEL_KEYS = [str(lv) for lv in CONFIDENCE_LEVELS]   # '0.8', '0.9', '0.95'
+
+
+def health_from_rul(rul: np.ndarray) -> np.ndarray:
+    """Health index derived from predicted RUL: 98% at the 125-cycle cap, 15% at zero."""
+    return np.round(15.0 + (np.clip(rul / 125.0, 0.0, 1.0) ** 0.85) * 83.0, 1)
+
+
+def status_from_health(h: float) -> str:
+    return 'HEALTHY' if h >= 75.0 else 'MONITOR' if h >= 45.0 else 'CRITICAL'
+
+
+class ArtifactsMissing(RuntimeError):
+    pass
 
 
 class DigitalTwinService:
-    """Singleton service managing Digital Twin instances for C-MAPSS FD004 fleet."""
-
-    _instance = None
-
-    def __init__(self):
-        self.data_loader = CMAPSSDataLoader(data_dir=os.path.join(PROJECT_ROOT, 'data/raw'))
-        self.rul_predictor = RULPredictor()
-        self.conformal = ConformalPredictor(alpha=0.10)
-        self.fault_classifier = FaultClassifier()
-        self.drift_detectors: Dict[int, DriftDetector] = {}
-        self.counterfactual_sim = CounterfactualSimulator()
-        self.advisor = AIAirworthinessAdvisor()
-
-        self.test_df: Optional[pd.DataFrame] = None
-        self.train_df: Optional[pd.DataFrame] = None
-        self.test_norm: Optional[pd.DataFrame] = None
-        self.rul_true: Optional[np.ndarray] = None
-        self.benchmark_metrics: Dict[str, Any] = {}
-
-        self.initialized: bool = False
+    _instance: Optional['DigitalTwinService'] = None
 
     @classmethod
-    def get_instance(cls) -> "DigitalTwinService":
+    def get_instance(cls) -> 'DigitalTwinService':
         if cls._instance is None:
             cls._instance = DigitalTwinService()
             cls._instance.initialize()
         return cls._instance
 
+    def __init__(self):
+        self.loader = CMAPSSDataLoader(data_dir=DATA_DIR)
+        self.rul = RULPredictor()
+        self.cqr = CQRPredictor()
+        self.monitor = HealthStateMonitor()
+        self.fault = FaultClassifier()
+        self.drift = DriftDetector()
+        self.simulator = CounterfactualSimulator()
+        self.advisor = MaintenanceAdvisor()
+        self.benchmark: Dict[str, Any] = {}
+        self.experiments: Dict[str, Any] = {}
+        self.feats: Optional[pd.DataFrame] = None
+        self.rows: Dict[int, pd.DataFrame] = {}
+        self.engine_cache: Dict[int, Dict[str, Any]] = {}
+        self.calibration_log: Dict[int, List[Dict[str, Any]]] = {}
+        self.ready = False
+        self.error: Optional[str] = None
+
+    # -- Startup ----------------------------------------------------------------------
+
+    def _path(self, name: str) -> str:
+        return os.path.join(MODELS_DIR, name)
+
     def initialize(self):
-        """Loads models and datasets into memory."""
-        if self.initialized:
+        required = ['rul_predictor.joblib', 'cqr_predictor.joblib', 'health_monitor.joblib',
+                    'fault_classifier.joblib', 'drift_detector.joblib', 'regime_scaler.joblib']
+        missing = [f for f in required if not os.path.exists(self._path(f))]
+        if missing:
+            self.error = f"Model artifacts missing ({', '.join(missing)}). Run: python3 ml/train_and_evaluate.py"
+            print(f'[DigitalTwinService] {self.error}')
             return
 
-        models_dir = os.path.join(PROJECT_ROOT, 'ml/models')
-        rul_model_file = os.path.join(models_dir, 'rul_predictor.joblib')
-        conformal_file = os.path.join(models_dir, 'conformal_predictor.joblib')
-        summary_file = os.path.join(models_dir, 'benchmark_summary.json')
+        # Artifacts are produced locally by ml/train_and_evaluate.py; never load joblib files from elsewhere.
+        self.loader.regime_scaler = joblib.load(self._path('regime_scaler.joblib'))['regime_scaler']
+        self.rul.load(self._path('rul_predictor.joblib'))
+        self.cqr.load(self._path('cqr_predictor.joblib'))
+        self.monitor.load(self._path('health_monitor.joblib'))
+        self.fault.load(self._path('fault_classifier.joblib'))
+        self.drift.__dict__.update(joblib.load(self._path('drift_detector.joblib')))
+        for name, attr in (('benchmark_summary.json', 'benchmark'), ('experiments.json', 'experiments')):
+            if os.path.exists(self._path(name)):
+                with open(self._path(name)) as f:
+                    setattr(self, attr, json.load(f))
 
-        # Load dataset
-        try:
-            self.train_df, self.test_df, self.rul_true = self.data_loader.load_dataset('FD004')
-            self.data_loader.fit_regime_standardization(self.train_df)
-            self.test_norm = self.data_loader.standardize_by_regime(self.test_df)
-            self.test_norm = self.data_loader.extract_features(self.test_norm, window=10)
-        except Exception as e:
-            print(f"[DigitalTwinService] Warning loading raw dataset: {e}")
+        _, test_df, rul_true = self.loader.load_dataset('FD004')
+        feats = build_twin_features(self.loader, test_df)
+        X = feats[self.rul.feature_columns].fillna(0)
+        feats['rul_pred'] = np.round(self.rul.predict(X), 1)
 
-        # Load models if pre-trained
-        if os.path.exists(rul_model_file):
-            try:
-                self.rul_predictor.load(rul_model_file)
-            except Exception as e:
-                print(f"[DigitalTwinService] Warning loading RUL model: {e}")
+        # Self-calibrate intervals to the deployed fleet (label-free, see conformal.py).
+        last_pred = feats.groupby('engine_id')['rul_pred'].last().values
+        self.cqr.adapt_to_fleet(last_pred)
+        for lv, key in zip(CONFIDENCE_LEVELS, LEVEL_KEYS):
+            lo, hi = self.cqr.predict_interval(X, lv, adapted=True)
+            feats[f'lo_{key}'] = np.round(np.minimum(lo, feats['rul_pred']), 1)
+            feats[f'hi_{key}'] = np.round(np.maximum(hi, feats['rul_pred']), 1)
 
-        if os.path.exists(conformal_file):
-            try:
-                self.conformal.load(conformal_file)
-            except Exception as e:
-                print(f"[DigitalTwinService] Warning loading Conformal model: {e}")
+        feats['anomaly_score'] = np.round(self.monitor.score(feats), 2)
+        feats['health_pct'] = health_from_rul(feats['rul_pred'].values)
+        self.feats = feats
+        self.rows = {int(eid): g.reset_index(drop=True) for eid, g in feats.groupby('engine_id')}
+        self.true_rul = {int(eid): float(r) for eid, r in zip(sorted(self.rows), rul_true)}
 
-        if os.path.exists(summary_file):
-            try:
-                with open(summary_file, 'r') as f:
-                    self.benchmark_metrics = json.load(f)
-            except Exception as e:
-                print(f"[DigitalTwinService] Warning reading benchmark json: {e}")
+        for eid in self.rows:
+            self.engine_cache[eid] = self._summarize(eid)
+        self.ready = True
+        print(f'[DigitalTwinService] Ready: {len(self.rows)} FD004 test engines.')
 
-        self.initialized = True
-        print("[DigitalTwinService] Successfully initialized.")
+    def require_ready(self):
+        if not self.ready:
+            raise ArtifactsMissing(self.error or 'Service is not initialized')
 
-    def _get_drift_detector(self, engine_id: int) -> DriftDetector:
-        if engine_id not in self.drift_detectors:
-            dd = DriftDetector(drift_threshold=0.22, min_window_size=15)
-            # Use early cycles as baseline
-            if self.test_norm is not None:
-                eng_data = self.test_norm[self.test_norm['engine_id'] == engine_id]
-                if len(eng_data) > 0:
-                    dd.set_baseline(eng_data.head(min(25, len(eng_data))))
-            self.drift_detectors[engine_id] = dd
-        return self.drift_detectors[engine_id]
+    # -- Per-engine state ---------------------------------------------------------------
 
-    def get_fleet_overview(self) -> Dict[str, Any]:
-        """Provides high-level health and status overview for all engines."""
-        if self.test_norm is None:
-            return {'total_engines': 0, 'engines': []}
-
-        engine_ids = sorted(self.test_norm['engine_id'].unique().tolist())
-        summaries = []
-        healthy_cnt = 0
-        monitor_cnt = 0
-        critical_cnt = 0
-        total_health = 0.0
-        total_rul = 0.0
-
-        for eid in engine_ids:
-            eng_df = self.test_norm[self.test_norm['engine_id'] == eid]
-            curr_cycle = int(eng_df['cycle'].max())
-            regime = int(eng_df.iloc[-1]['regime'])
-
-            # Estimate RUL first
-            if self.rul_predictor.fitted:
-                feat_cols = self.rul_predictor.feature_columns
-                latest_feats = eng_df.iloc[-1:][feat_cols].fillna(0)
-                pred_rul = float(self.rul_predictor.predict(latest_feats)[0])
-            else:
-                pred_rul = 80.0
-
-            pred_rul = round(pred_rul, 1)
-            total_rul += pred_rul
-
-            diag = self.fault_classifier.diagnose_trajectory(eng_df, predicted_rul=pred_rul)
-            health = diag['health_pct']
-            status = diag['status']
-            total_health += health
-
-            if status == 'HEALTHY':
-                healthy_cnt += 1
-            elif status == 'MONITOR':
-                monitor_cnt += 1
-            else:
-                critical_cnt += 1
-
-            low, high, _ = self.conformal.predict_interval(np.array([pred_rul]))
-
-            summaries.append({
-                'engine_id': eid,
-                'unit_code': f"FD004-{eid:03d}",
-                'current_cycle': curr_cycle,
-                'health_pct': health,
-                'status': status,
-                'rul_pred': pred_rul,
-                'rul_lower': round(float(low[0]), 1),
-                'rul_upper': round(float(high[0]), 1),
-                'fault_mode': diag['fault_mode'],
-                'fault_label': diag['fault_label'],
-                'operating_regime': regime,
-                'regime_name': REGIME_NAMES.get(regime, f"Regime {regime}")
-            })
-
-        n = len(summaries)
+    def _summarize(self, eid: int) -> Dict[str, Any]:
+        g = self.rows[eid]
+        last = g.iloc[-1]
+        rul_pred = float(last['rul_pred'])
+        diag = self.fault.diagnose_trajectory(g, predicted_rul=rul_pred)
+        drift = self.drift.evaluate_drift(g, rul_pred)
+        alarm = self.monitor.persistent_alarm(g['anomaly_score'].values)
+        first_alarm = int(g['cycle'].values[np.argmax(alarm)]) if alarm.any() else None
+        intervals = {k: {'lower': float(last[f'lo_{k}']), 'upper': float(last[f'hi_{k}'])} for k in LEVEL_KEYS}
+        decision_key = '0.95' if drift['drift_detected'] else '0.9'
         return {
-            'total_engines': n,
-            'healthy_count': healthy_cnt,
-            'monitor_count': monitor_cnt,
-            'critical_count': critical_cnt,
-            'average_health_pct': round(total_health / max(1, n), 1),
-            'mean_rul': round(total_rul / max(1, n), 1),
-            'engines': summaries
-        }
-
-    def get_engine_detail(self, engine_id: int) -> Dict[str, Any]:
-        """Provides telemetry history, sensor streams, RUL interval, diagnostics for an engine."""
-        if self.test_norm is None:
-            raise ValueError("Test data not loaded")
-
-        eng_df = self.test_norm[self.test_norm['engine_id'] == engine_id]
-        if len(eng_df) == 0:
-            raise KeyError(f"Engine {engine_id} not found in FD004 test set")
-
-        curr_cycle = int(eng_df['cycle'].max())
-        latest = eng_df.iloc[-1]
-        regime = int(latest['regime'])
-
-        # RUL Prediction
-        if self.rul_predictor.fitted:
-            feat_cols = self.rul_predictor.feature_columns
-            latest_feats = eng_df.iloc[-1:][feat_cols].fillna(0)
-            pred_rul = float(self.rul_predictor.predict(latest_feats)[0])
-        else:
-            pred_rul = 80.0
-
-        pred_rul = round(pred_rul, 1)
-        low, high, _ = self.conformal.predict_interval(np.array([pred_rul]))
-        low_val = round(float(low[0]), 1)
-        high_val = round(float(high[0]), 1)
-
-        # Diagnosis
-        diag = self.fault_classifier.diagnose_trajectory(eng_df, predicted_rul=pred_rul)
-
-        # Drift assessment
-        dd = self._get_drift_detector(engine_id)
-        drift_res = dd.evaluate_drift(eng_df)
-
-        # Telemetry history (downsample if long)
-        step = max(1, len(eng_df) // 40)
-        history_slice = eng_df.iloc[::step]
-        telemetry_history = []
-
-        for _, row in history_slice.iterrows():
-            telemetry_history.append({
-                'cycle': int(row['cycle']),
-                'setting_1': round(float(row['setting_1']), 2),
-                'setting_2': round(float(row['setting_2']), 3),
-                'setting_3': round(float(row['setting_3']), 1),
-                'regime': int(row['regime']),
-                'health_pct': round(max(5.0, 100.0 - (float(row['cycle']) / max(1, curr_cycle)) * (100.0 - diag['health_pct'])), 1),
-                'hpc_index': round(float(row.get('hpc_degrade_index', 0.0)), 2),
-                'fan_index': round(float(row.get('fan_degrade_index', 0.0)), 2),
-                'key_sensors': {
-                    'T30': round(float(row.get('sensor_3', 0.0)), 1),
-                    'P30': round(float(row.get('sensor_7', 0.0)), 1),
-                    'Nf': round(float(row.get('sensor_8', 0.0)), 1),
-                    'Ps30': round(float(row.get('sensor_11', 0.0)), 2),
-                    'BPR': round(float(row.get('sensor_15', 0.0)), 3)
-                }
-            })
-
-        # Latest sensors with metadata
-        latest_sensors = []
-        for s_col, meta in SENSOR_METADATA.items():
-            raw_val = float(latest[s_col]) if s_col in latest else 0.0
-            norm_col = f'{s_col}_norm'
-            norm_val = float(latest[norm_col]) if norm_col in latest else 0.0
-            latest_sensors.append({
-                'key': s_col,
-                'name': meta['name'],
-                'description': meta['desc'],
-                'raw_value': round(raw_val, 2),
-                'norm_value': round(norm_val, 2),
-                'unit': meta['unit']
-            })
-
-        return {
-            'engine_id': engine_id,
-            'unit_code': f"FD004-{engine_id:03d}",
-            'total_cycles_observed': curr_cycle,
-            'health_pct': diag['health_pct'],
-            'status': diag['status'],
-            'rul_pred': pred_rul,
-            'rul_lower': low_val,
-            'rul_upper': high_val,
-            'confidence_pct': 90.0,
+            'engine_id': eid,
+            'unit_code': f'FD004-{eid:03d}',
+            'current_cycle': int(last['cycle']),
+            'health_pct': float(last['health_pct']),
+            'status': status_from_health(float(last['health_pct'])),
+            'rul_pred': rul_pred,
+            'rul_lower': intervals['0.9']['lower'],
+            'rul_upper': intervals['0.9']['upper'],
+            'intervals': intervals,
             'fault_mode': diag['fault_mode'],
             'fault_label': diag['fault_label'],
-            'operating_regime': regime,
-            'regime_name': REGIME_NAMES.get(regime, f"Regime {regime}"),
-            'drift_status': drift_res,
-            'active_anomalies': diag['anomalies'],
-            'telemetry_history': telemetry_history,
-            'latest_sensors': latest_sensors
-        }
-
-    def simulate_counterfactual(
-        self,
-        engine_id: int,
-        altitude_kft: float = 35.0,
-        mach_number: float = 0.80,
-        throttle_pct: float = 100.0
-    ) -> Dict[str, Any]:
-        """Runs counterfactual what-if simulation."""
-        detail = self.get_engine_detail(engine_id)
-        return self.counterfactual_sim.simulate_scenario(
-            current_cycle=detail['total_cycles_observed'],
-            current_health_pct=detail['health_pct'],
-            baseline_rul=detail['rul_pred'],
-            altitude_kft=altitude_kft,
-            mach_number=mach_number,
-            throttle_pct=throttle_pct,
-            fault_mode=detail['fault_mode']
-        )
-
-    def trigger_self_calibration(self, engine_id: int) -> Dict[str, Any]:
-        """Manually forces self-calibration update for engine digital twin."""
-        dd = self._get_drift_detector(engine_id)
-        eng_df = self.test_norm[self.test_norm['engine_id'] == engine_id]
-        dd.trigger_self_calibration(eng_df)
-        return {
-            'engine_id': engine_id,
-            'calibrated': True,
-            'status': 'MODEL_CALIBRATED',
-            'message': f"Digital Twin for FD004-{engine_id:03d} successfully recalibrated to latest operational regime."
-        }
-
-    def get_ai_advisor(self, engine_id: int) -> Dict[str, Any]:
-        """Produces agentic reasoning audit and prescriptive decision support."""
-        detail = self.get_engine_detail(engine_id)
-        return self.advisor.generate_assessment(
-            engine_id=engine_id,
-            cycle=detail['total_cycles_observed'],
-            health_pct=detail['health_pct'],
-            status=detail['status'],
-            rul_pred=detail['rul_pred'],
-            rul_interval={'lower': detail['rul_lower'], 'upper': detail['rul_upper']},
-            fault_diagnosis={
-                'fault_mode': detail['fault_mode'],
-                'fault_label': detail['fault_label'],
-                'confidence': 0.94,
-                'anomalies': detail['active_anomalies']
+            'fault_confidence': diag['confidence'],
+            'diagnosis': diag,
+            'operating_regime': int(last['regime']),
+            'regime_name': REGIME_NAMES.get(int(last['regime']), f"Regime {int(last['regime'])}"),
+            'current_settings': {
+                'altitude_kft': round(float(last['setting_1']), 1),
+                'mach_number': round(float(last['setting_2']), 2),
+                'throttle_pct': round(float(last['setting_3']), 0),
             },
-            drift_status=detail['drift_status'],
-            operating_regime=detail['operating_regime']
+            'drift_status': drift,
+            'anomaly': {
+                'score': float(last['anomaly_score']),
+                'threshold': round(self.monitor.threshold, 2),
+                'alarm': bool(alarm[-1]),
+                'first_alarm_cycle': first_alarm,
+            },
+            'action_code': decide(intervals[decision_key]['lower']),
+        }
+
+    def _engine(self, eid: int) -> Dict[str, Any]:
+        self.require_ready()
+        if eid not in self.engine_cache:
+            raise KeyError(f'Engine {eid} not found in the FD004 test set')
+        return self.engine_cache[eid]
+
+    # -- Public API -----------------------------------------------------------------------
+
+    def get_fleet_overview(self) -> Dict[str, Any]:
+        self.require_ready()
+        engines = []
+        for eid in sorted(self.engine_cache):
+            s = self.engine_cache[eid]
+            engines.append({k: s[k] for k in (
+                'engine_id', 'unit_code', 'current_cycle', 'health_pct', 'status', 'rul_pred', 'rul_lower',
+                'rul_upper', 'fault_mode', 'fault_label', 'operating_regime', 'regime_name', 'action_code')}
+                | {'drift_detected': s['drift_status']['drift_detected'], 'anomaly_alarm': s['anomaly']['alarm']})
+        status = [e['status'] for e in engines]
+        return {
+            'total_engines': len(engines),
+            'healthy_count': status.count('HEALTHY'),
+            'monitor_count': status.count('MONITOR'),
+            'critical_count': status.count('CRITICAL'),
+            'average_health_pct': round(float(np.mean([e['health_pct'] for e in engines])), 1),
+            'mean_rul': round(float(np.mean([e['rul_pred'] for e in engines])), 1),
+            'action_counts': {a: sum(e['action_code'] == a for e in engines) for a in ('REMOVE', 'INSPECT', 'CONTINUE')},
+            'drift_count': sum(e['drift_detected'] for e in engines),
+            'engines': engines,
+        }
+
+    def get_engine_detail(self, eid: int) -> Dict[str, Any]:
+        s = self._engine(eid)
+        g = self.rows[eid]
+        last = g.iloc[-1]
+        early = g.head(min(15, len(g)))
+
+        history = []
+        for _, r in g.iterrows():
+            history.append({
+                'cycle': int(r['cycle']),
+                'regime': int(r['regime']),
+                'rul_pred': float(r['rul_pred']),
+                'rul_lower': float(r['lo_0.9']),
+                'rul_upper': float(r['hi_0.9']),
+                'health_pct': float(r['health_pct']),
+                'anomaly_score': float(r['anomaly_score']),
+                'sensors': {sn: round(float(r[f'{sn}_norm_roll_mean']), 3) for sn in ACTIVE_SENSORS},
+            })
+
+        latest_sensors = []
+        for sn in SENSOR_COLS:
+            meta = SENSOR_METADATA[sn]
+            active = sn in ACTIVE_SENSORS
+            latest_sensors.append({
+                'key': sn,
+                'channel': int(sn.split('_')[1]),
+                'name': meta['name'],
+                'description': meta['desc'],
+                'unit': meta['unit'],
+                'raw_value': round(float(last[sn]), 4),
+                'norm_value': round(float(last[f'{sn}_norm']), 2) if active else None,
+                'shift_sigma': round(float(g.tail(15)[f'{sn}_norm'].mean() - early[f'{sn}_norm'].mean()), 2) if active else None,
+                'informative': active,
+            })
+
+        detail = {k: v for k, v in s.items() if k != 'diagnosis'}
+        detail.update({
+            'total_cycles_observed': s['current_cycle'],
+            'confidence_pct': 90.0,
+            'hpc_score': s['diagnosis']['hpc_score'],
+            'fan_score': s['diagnosis']['fan_score'],
+            'signature_progress': s['diagnosis']['signature_progress'],
+            'active_anomalies': s['diagnosis']['anomalies'],
+            'telemetry_history': history,
+            'latest_sensors': latest_sensors,
+            'calibration_log': self.calibration_log.get(eid, []),
+        })
+        return detail
+
+    def get_drift(self, eid: int) -> Dict[str, Any]:
+        return self._engine(eid)['drift_status']
+
+    def simulate_counterfactual(self, eid: int, altitude_kft: float, mach_number: float, throttle_pct: float) -> Dict[str, Any]:
+        s = self._engine(eid)
+        return self.simulator.simulate_scenario(
+            current_cycle=s['current_cycle'], current_health_pct=s['health_pct'], baseline_rul=s['rul_pred'],
+            altitude_kft=altitude_kft, mach_number=mach_number, throttle_pct=throttle_pct,
+            fault_mode=s['fault_mode'], current_settings=s['current_settings'],
+            baseline_interval=s['intervals']['0.9'],
         )
+
+    def trigger_self_calibration(self, eid: int) -> Dict[str, Any]:
+        """Re-runs the twin-discrepancy check and applies the self-calibration policy."""
+        s = self._engine(eid)
+        drift = self.drift.evaluate_drift(self.rows[eid], s['rul_pred'])
+        s['drift_status'] = drift
+        if drift['drift_detected']:
+            message = ('Twin discrepancy is above threshold. Decisions for this engine now use the 95% interval '
+                       'until new run-to-failure data allows the conformal corrections to be refit.')
+        elif drift['drift_score'] is None:
+            message = 'Too few cycles to test for twin discrepancy. No change applied.'
+        else:
+            message = 'Twin discrepancy is within threshold. Calibration is current; no change applied.'
+        entry = {'cycle': s['current_cycle'], 'drift_score': drift['drift_score'],
+                 'escalated': bool(drift['drift_detected']), 'message': message}
+        self.calibration_log.setdefault(eid, []).append(entry)
+        return {'engine_id': eid, 'calibrated': not drift['drift_detected'], 'status': drift['status'],
+                'message': message, 'log_entry': entry}
+
+    def get_advisor(self, eid: int) -> Dict[str, Any]:
+        s = self._engine(eid)
+        engine = {**s, 'total_cycles_observed': s['current_cycle'],
+                  'active_anomalies': s['diagnosis']['anomalies']}
+
+        def runner(alt, mach, thr):
+            return self.simulate_counterfactual(eid, alt, mach, thr)
+
+        return self.advisor.generate_assessment(engine, scenario_runner=runner)
 
     def get_benchmark_metrics(self) -> Dict[str, Any]:
-        """Returns NASA C-MAPSS FD004 benchmark performance summary."""
-        return self.benchmark_metrics
+        return self.benchmark
+
+    def get_experiments(self) -> Dict[str, Any]:
+        return self.experiments
+
+    def get_test_predictions(self) -> List[Dict[str, Any]]:
+        """Last-cycle prediction vs. ground truth for every test engine (evaluation view only)."""
+        self.require_ready()
+        out = []
+        for eid in sorted(self.engine_cache):
+            s = self.engine_cache[eid]
+            out.append({'engine_id': eid, 'true_rul': min(self.true_rul[eid], 125.0), 'rul_pred': s['rul_pred'],
+                        'rul_lower': s['rul_lower'], 'rul_upper': s['rul_upper'], 'fault_mode': s['fault_mode']})
+        return out

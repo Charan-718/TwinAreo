@@ -1,21 +1,17 @@
 """
-TwinAero - Engine Telemetry & Digital Twin API Endpoints
+TwinAero - Engine state endpoint
 """
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, Path
+
+from backend.api.errors import service_errors
 from backend.services.twin_service import DigitalTwinService
-from backend.models.schemas import EngineDetailResponse
 
 router = APIRouter(prefix="/engine", tags=["Engine"])
 
 
-@router.get("/{engine_id}", response_model=EngineDetailResponse)
+@router.get("/{engine_id}")
 def get_engine_detail(engine_id: int = Path(..., ge=1, le=300)):
-    """Retrieves full digital twin state and sensor history for a specific engine."""
-    service = DigitalTwinService.get_instance()
-    try:
-        return service.get_engine_detail(engine_id)
-    except KeyError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Full twin state: per-cycle RUL and interval, anomaly score, sensors, diagnosis, drift."""
+    with service_errors():
+        return DigitalTwinService.get_instance().get_engine_detail(engine_id)

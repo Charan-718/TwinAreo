@@ -1,117 +1,97 @@
 """
-TwinAero - Drift Detection & Digital Twin Self-Calibration Engine
-Continuously monitors covariate shift and prediction residual drift across
-operating conditions, triggering adaptive recalibration when persistent deviations occur.
+TwinAero - Twin discrepancy (drift) detection and self-calibration policy
+
+Degradation itself moves sensor values, so comparing an engine with its own early
+life would flag every wearing engine. Instead the detector asks: does the engine's
+recent sensor window look like training engines *at the same predicted life stage*?
+
+Reference: training cycles whose (clipped) RUL lies within +/- `rul_band` of the
+engine's current predicted RUL. Per-sensor two-sample Kolmogorov-Smirnov statistics
+and Wasserstein distances are computed against that reference; the drift score is
+their mean KS statistic. The alarm threshold is a quantile of scores on in-domain
+held-out engines, so the in-domain false-alarm rate is chosen explicitly.
+
+Self-calibration policy when drift is flagged: decisions switch to the wider 95%
+interval, and the event is logged. Label-based recalibration (re-fitting conformal
+corrections or the model once new run-to-failure engines are observed) is evaluated
+offline in ml/experiments.
 """
+
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
-from typing import Dict, Any, List, Optional
 from scipy.stats import ks_2samp, wasserstein_distance
+
+DRIFT_SENSORS: List[str] = [f'sensor_{i}_norm_roll_mean' for i in (2, 3, 4, 7, 11, 12, 15, 17, 20, 21)]
 
 
 class DriftDetector:
-    """
-    Statistical drift detector and self-calibrator for streaming engine cycles.
-    """
+    def __init__(self, window: int = 15, rul_band: float = 10.0, false_alarm_rate: float = 0.05):
+        self.window = window
+        self.rul_band = rul_band
+        self.false_alarm_rate = false_alarm_rate
+        self.reference: Optional[pd.DataFrame] = None
+        self.threshold: float = float('nan')
 
-    def __init__(self, drift_threshold: float = 0.22, min_window_size: int = 15):
-        self.drift_threshold = drift_threshold
-        self.min_window_size = min_window_size
-        self.baseline_data: Optional[pd.DataFrame] = None
-        self.last_calibration_cycle: int = 0
-        self.cumulative_residual_drift: float = 0.0
-        self.calibration_offset: float = 0.0
-        self.is_calibrated: bool = True
+    def fit(self, train_feats: pd.DataFrame, rul_col: str = 'clipped_rul'):
+        self.reference = train_feats[DRIFT_SENSORS + [rul_col]].rename(columns={rul_col: '_rul'}).dropna()
+        return self
 
-    def set_baseline(self, baseline_df: pd.DataFrame):
-        """Sets reference baseline sensor distributions (e.g. initial 30 cycles or fleet nominal)."""
-        self.baseline_data = baseline_df.copy()
+    def _reference_slice(self, predicted_rul: float) -> pd.DataFrame:
+        ref = self.reference
+        sl = ref[(ref['_rul'] - predicted_rul).abs() <= self.rul_band]
+        return sl if len(sl) >= 50 else ref.iloc[(ref['_rul'] - predicted_rul).abs().argsort()[:500]]
 
-    def evaluate_drift(
-        self,
-        current_df: pd.DataFrame,
-        sensor_columns: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
-        """
-        Assesses distribution drift between baseline reference and current window.
-        """
-        if self.baseline_data is None or len(current_df) < self.min_window_size:
+    def score(self, engine_feats: pd.DataFrame, predicted_rul: float) -> Dict[str, Any]:
+        recent = engine_feats.tail(self.window)
+        if len(recent) < 5:
+            return {'drift_score': None, 'channels': []}
+        ref = self._reference_slice(predicted_rul)
+        channels = []
+        for col in DRIFT_SENSORS:
+            stat, p = ks_2samp(ref[col].values, recent[col].values)
+            channels.append({
+                'sensor': col.replace('_norm_roll_mean', ''),
+                'ks_stat': round(float(stat), 3),
+                'p_value': float(p),
+                'wasserstein_dist': round(float(wasserstein_distance(ref[col].values, recent[col].values)), 3),
+            })
+        return {'drift_score': float(np.mean([c['ks_stat'] for c in channels])), 'channels': channels}
+
+    def calibrate_threshold(self, scores: np.ndarray):
+        scores = np.asarray([s for s in scores if s is not None])
+        self.threshold = float(np.quantile(scores, 1.0 - self.false_alarm_rate))
+        return self
+
+    def evaluate_drift(self, engine_feats: pd.DataFrame, predicted_rul: float) -> Dict[str, Any]:
+        res = self.score(engine_feats, predicted_rul)
+        score = res['drift_score']
+        if score is None:
             return {
-                'drift_detected': False,
-                'drift_score': 0.04,
-                'p_value': 0.85,
-                'status': 'MODEL_CALIBRATED',
-                'severity': 'LOW',
-                'calibrated': True,
-                'recalibration_triggered': False,
-                'affected_channels': [],
-                'drift_metric': 'KS_TEST_WASSERSTEIN'
+                'drift_detected': False, 'drift_score': None, 'threshold': round(self.threshold, 3),
+                'p_value': None, 'status': 'INSUFFICIENT_DATA', 'severity': 'LOW',
+                'calibrated': True, 'recalibration_triggered': False, 'affected_channels': [],
+                'channels': [], 'drift_metric': 'KS_VS_LIFE_STAGE_REFERENCE', 'window_cycles': self.window,
             }
-
-        if sensor_columns is None:
-            # Check key informative sensors: T30 (3), P30 (7), Nf (8), Ps30 (11), BPR (15)
-            sensor_columns = [c for c in ['sensor_3_norm', 'sensor_7_norm', 'sensor_8_norm', 'sensor_11_norm', 'sensor_15_norm'] if c in current_df.columns]
-
-        recent_window = current_df.tail(self.min_window_size)
-        baseline_sample = self.baseline_data.head(min(50, len(self.baseline_data)))
-
-        ks_scores = []
-        w_distances = []
-        affected = []
-
-        for col in sensor_columns:
-            b_vals = baseline_sample[col].dropna().values
-            c_vals = recent_window[col].dropna().values
-
-            if len(b_vals) > 5 and len(c_vals) > 5:
-                stat, p_val = ks_2samp(b_vals, c_vals)
-                w_dist = wasserstein_distance(b_vals, c_vals)
-                ks_scores.append(stat)
-                w_distances.append(w_dist)
-
-                if stat > self.drift_threshold:
-                    affected.append({
-                        'sensor': col.replace('_norm', ''),
-                        'ks_stat': round(float(stat), 3),
-                        'p_value': round(float(p_val), 4),
-                        'wasserstein_dist': round(float(w_dist), 3)
-                    })
-
-        overall_drift_score = float(np.mean(ks_scores)) if ks_scores else 0.05
-        avg_p_val = float(np.min([a['p_value'] for a in affected])) if affected else 0.72
-
-        drift_detected = overall_drift_score > self.drift_threshold
-        recalibration_triggered = False
-
-        if drift_detected:
-            severity = 'HIGH' if overall_drift_score > 0.45 else 'MODERATE'
-            status = 'DRIFT_DETECTED_RECALIBRATING'
-            # Trigger self-calibration
-            self.trigger_self_calibration(recent_window)
-            recalibration_triggered = True
-        else:
-            severity = 'LOW'
-            status = 'MODEL_CALIBRATED'
-
+        n = len(res['channels'])
+        for c in res['channels']:
+            c['p_value_adjusted'] = round(min(1.0, c['p_value'] * n), 4)
+            c['p_value'] = round(c['p_value'], 4)
+        detected = score > self.threshold
+        affected = [c for c in res['channels'] if c['ks_stat'] > self.threshold and c['p_value_adjusted'] < 0.05]
+        severity = 'HIGH' if score > 1.5 * self.threshold else 'MODERATE' if detected else 'LOW'
         return {
-            'drift_detected': drift_detected,
-            'drift_score': round(overall_drift_score, 3),
-            'p_value': round(avg_p_val, 4),
-            'status': status,
+            'drift_detected': bool(detected),
+            'drift_score': round(score, 3),
+            'threshold': round(self.threshold, 3),
+            'p_value': min(c['p_value_adjusted'] for c in res['channels']),
+            'status': 'DRIFT_DETECTED' if detected else 'WITHIN_REFERENCE',
             'severity': severity,
-            'calibrated': self.is_calibrated,
-            'recalibration_triggered': recalibration_triggered,
-            'last_calibrated_cycle': self.last_calibration_cycle,
+            'calibrated': not detected,
+            'recalibration_triggered': bool(detected),
             'affected_channels': affected,
-            'drift_metric': 'KS_TEST_WASSERSTEIN'
+            'channels': res['channels'],
+            'drift_metric': 'KS_VS_LIFE_STAGE_REFERENCE',
+            'window_cycles': self.window,
         }
-
-    def trigger_self_calibration(self, recent_window: pd.DataFrame):
-        """
-        Adapts baseline scaling parameters and dynamic offset to neutralize drift.
-        """
-        if len(recent_window) > 0 and 'cycle' in recent_window.columns:
-            self.last_calibration_cycle = int(recent_window['cycle'].max())
-        self.is_calibrated = True
-        self.cumulative_residual_drift = 0.0

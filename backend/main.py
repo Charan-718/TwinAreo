@@ -24,7 +24,7 @@ from backend.services.twin_service import DigitalTwinService
 app = FastAPI(
     title="TwinAero Digital Twin API",
     description="Uncertainty-Aware & Self-Calibrating Digital Twin for Aerospace Engine Health Management (NASA C-MAPSS FD004)",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 # Enable CORS for React frontend
@@ -53,13 +53,13 @@ def startup_event():
 
 @app.get("/api/health")
 def healthcheck():
+    service = DigitalTwinService.get_instance()
     return {
-        "status": "healthy",
+        "status": "ready" if service.ready else "models_missing",
+        "detail": service.error,
         "service": "TwinAero Digital Twin API",
         "benchmark": "NASA C-MAPSS FD004",
-        "engine_count": 248,
-        "operating_conditions": 6,
-        "fault_modes": ["HPC Degradation", "Fan Degradation"]
+        "engine_count": len(service.rows),
     }
 
 

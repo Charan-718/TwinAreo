@@ -1,0 +1,381 @@
+{
+  "generated_at": "2026-10-12 09:09",
+  "dataset_primary": "NASA C-MAPSS FD004",
+  "fd001": {
+    "description": "Single operating condition, HPC degradation only. Used to debug the pipeline before FD004.",
+    "train_engines": 100,
+    "test_engines": 100,
+    "conventional": {
+      "rmse": 17.75,
+      "mae": 12.35,
+      "nasa_score": 1069.4,
+      "mean_nasa_score": 10.69
+    },
+    "digital_twin": {
+      "rmse": 19.37,
+      "mae": 13.3,
+      "nasa_score": 1393.2,
+      "mean_nasa_score": 13.93
+    },
+    "split_conformal_90": {
+      "target_coverage_pct": 90.0,
+      "empirical_coverage_pct": 85.0,
+      "mpiw_cycles": 50.08,
+      "coverage_gap_pct": -5.0
+    }
+  },
+  "fd004": {
+    "protocol": "Models fitted on all 249 training engines with 5-fold cross-conformal calibration (the served model); drift threshold from held-out engines with out-of-fold predictions; official test set at the last observed cycle, RUL clipped at 125. A0 is a point model only.",
+    "ablation": [
+      {
+        "id": "A0",
+        "name": "Conventional RUL",
+        "detail": "Raw sensors and settings, no operating-regime handling",
+        "rmse": 18.85,
+        "mae": 13.69,
+        "nasa_score": 2950.7,
+        "mean_nasa_score": 11.9
+      },
+      {
+        "id": "A1",
+        "name": "Digital twin features",
+        "detail": "Regime-normalized sensors, rolling statistics, degradation indices",
+        "rmse": 19.06,
+        "mae": 13.83,
+        "nasa_score": 3188.1,
+        "mean_nasa_score": 12.86,
+        "decision_agreement_pct": 87.1,
+        "missed_removals": 11
+      },
+      {
+        "id": "A2",
+        "name": "+ Uncertainty",
+        "detail": "CQR 90% intervals, cross-conformal calibration",
+        "rmse": 19.06,
+        "mae": 13.83,
+        "nasa_score": 3188.1,
+        "mean_nasa_score": 12.86,
+        "coverage_90": 86.69,
+        "width_90": 53.15,
+        "missed_removals": 0,
+        "decision_agreement_pct": 76.6
+      },
+      {
+        "id": "A3",
+        "name": "+ Self-calibration",
+        "detail": "Label-shift-weighted CQR adapted to the deployed fleet (no labels)",
+        "rmse": 19.06,
+        "mae": 13.83,
+        "nasa_score": 3188.1,
+        "mean_nasa_score": 12.86,
+        "coverage_90": 90.32,
+        "width_90": 56.36
+      },
+      {
+        "id": "A4",
+        "name": "+ Counterfactual",
+        "detail": "What-if surrogate; consistency checks only",
+        "rmse": 19.06,
+        "mae": 13.83,
+        "nasa_score": 3188.1,
+        "mean_nasa_score": 12.86,
+        "coverage_90": 90.32,
+        "width_90": 56.36,
+        "counterfactual_consistency_pct": 100.0
+      },
+      {
+        "id": "A5",
+        "name": "Full agentic framework",
+        "detail": "Agent decides on the conservative bound, 95% when drift is flagged",
+        "rmse": 19.06,
+        "mae": 13.83,
+        "nasa_score": 3188.1,
+        "mean_nasa_score": 12.86,
+        "coverage_90": 90.32,
+        "width_90": 56.36,
+        "decision_agreement_pct": 76.2,
+        "missed_removals": 0
+      }
+    ],
+    "intervals": {
+      "split": {
+        "0.8": {
+          "target_coverage_pct": 80.0,
+          "empirical_coverage_pct": 73.79,
+          "mpiw_cycles": 39.63,
+          "coverage_gap_pct": -6.21
+        },
+        "0.9": {
+          "target_coverage_pct": 90.0,
+          "empirical_coverage_pct": 87.5,
+          "mpiw_cycles": 57.81,
+          "coverage_gap_pct": -2.5
+        },
+        "0.95": {
+          "target_coverage_pct": 95.0,
+          "empirical_coverage_pct": 95.56,
+          "mpiw_cycles": 74.74,
+          "coverage_gap_pct": 0.56
+        }
+      },
+      "cqr": {
+        "0.8": {
+          "target_coverage_pct": 80.0,
+          "empirical_coverage_pct": 75.81,
+          "mpiw_cycles": 36.13,
+          "coverage_gap_pct": -4.19
+        },
+        "0.9": {
+          "target_coverage_pct": 90.0,
+          "empirical_coverage_pct": 86.69,
+          "mpiw_cycles": 53.15,
+          "coverage_gap_pct": -3.31
+        },
+        "0.95": {
+          "target_coverage_pct": 95.0,
+          "empirical_coverage_pct": 93.95,
+          "mpiw_cycles": 74.75,
+          "coverage_gap_pct": -1.05
+        }
+      },
+      "cqr_fleet_adapted": {
+        "0.8": {
+          "target_coverage_pct": 80.0,
+          "empirical_coverage_pct": 77.82,
+          "mpiw_cycles": 37.85,
+          "coverage_gap_pct": -2.18
+        },
+        "0.9": {
+          "target_coverage_pct": 90.0,
+          "empirical_coverage_pct": 90.32,
+          "mpiw_cycles": 56.36,
+          "coverage_gap_pct": 0.32
+        },
+        "0.95": {
+          "target_coverage_pct": 95.0,
+          "empirical_coverage_pct": 95.97,
+          "mpiw_cycles": 78.94,
+          "coverage_gap_pct": 0.97
+        }
+      }
+    },
+    "calibration_curve": [
+      {
+        "nominal": 0.5,
+        "split": 40.32
+      },
+      {
+        "nominal": 0.6,
+        "split": 50.4
+      },
+      {
+        "nominal": 0.7,
+        "split": 62.9
+      },
+      {
+        "nominal": 0.8,
+        "split": 73.79,
+        "cqr_adapted": 77.82,
+        "cqr": 75.81
+      },
+      {
+        "nominal": 0.85,
+        "split": 82.26
+      },
+      {
+        "nominal": 0.9,
+        "split": 87.5,
+        "cqr_adapted": 90.32,
+        "cqr": 86.69
+      },
+      {
+        "nominal": 0.95,
+        "split": 95.56,
+        "cqr_adapted": 95.97,
+        "cqr": 93.95
+      }
+    ],
+    "decisions": {
+      "thresholds": {
+        "remove_at": 20,
+        "inspect_at": 50
+      },
+      "oracle": "Same policy applied to the true RUL",
+      "drift_flag_rate_last_cycle_pct": 4.4,
+      "policies": {
+        "point_estimate": {
+          "agreement_pct": 87.1,
+          "missed_removals": 11,
+          "missed_removal_rate_pct": 27.5,
+          "unsafe_continue": 12,
+          "unnecessary_removals": 0,
+          "oracle_removals": 40,
+          "flips_per_engine_last10": 0.399
+        },
+        "split_lower_90": {
+          "agreement_pct": 75.0,
+          "missed_removals": 0,
+          "missed_removal_rate_pct": 0.0,
+          "unsafe_continue": 3,
+          "unnecessary_removals": 7,
+          "oracle_removals": 40
+        },
+        "cqr_adapted_lower_90": {
+          "agreement_pct": 76.6,
+          "missed_removals": 0,
+          "missed_removal_rate_pct": 0.0,
+          "unsafe_continue": 1,
+          "unnecessary_removals": 3,
+          "oracle_removals": 40,
+          "flips_per_engine_last10": 0.423
+        },
+        "agent": {
+          "agreement_pct": 76.2,
+          "missed_removals": 0,
+          "missed_removal_rate_pct": 0.0,
+          "unsafe_continue": 1,
+          "unnecessary_removals": 3,
+          "oracle_removals": 40,
+          "flips_per_engine_last10": 0.46
+        }
+      }
+    },
+    "counterfactual": {
+      "scenarios_checked": 120,
+      "identity_at_current_point_pct": 100.0,
+      "monotone_in_throttle_pct": 100.0,
+      "note": "Internal consistency only. C-MAPSS has no ground truth for alternative operating profiles."
+    }
+  },
+  "anomaly": {
+    "auroc": 0.989,
+    "precision": 0.988,
+    "recall": 0.655,
+    "f1": 0.788,
+    "threshold": 9.226,
+    "healthy_false_alarm_rate_pct": 0.19,
+    "engines_with_false_alarm_pct": 0.0,
+    "detection_rate_pct": 76.0,
+    "median_lead_time_cycles": 39.5,
+    "labels": "healthy: true RUL > 125; degraded: true RUL <= 30",
+    "evaluation_engines": 50,
+    "method": "Mahalanobis distance to early-life (first 30 cycles) sensor distribution; threshold = 99th percentile on held-out healthy cycles; alarm after 3 consecutive exceedances."
+  },
+  "fault_modes": {
+    "fd004_engines": 249,
+    "cluster_sizes": {
+      "HPC_DEGRADATION": 148,
+      "FAN_DEGRADATION": 101
+    },
+    "silhouette": 0.671,
+    "fd002_engines": 260,
+    "fd002_assigned_to_hpc_pct": 100.0,
+    "top_separating_sensors": [
+      {
+        "sensor": "sensor_12",
+        "hpc_minus_fan_sigma": -4.4
+      },
+      {
+        "sensor": "sensor_7",
+        "hpc_minus_fan_sigma": -4.33
+      },
+      {
+        "sensor": "sensor_15",
+        "hpc_minus_fan_sigma": 4.02
+      },
+      {
+        "sensor": "sensor_10",
+        "hpc_minus_fan_sigma": -3.42
+      },
+      {
+        "sensor": "sensor_21",
+        "hpc_minus_fan_sigma": -3.2
+      }
+    ],
+    "fd001_check": {
+      "expected": "HPC only",
+      "engines": 100,
+      "hpc_pct": 100.0,
+      "fan_pct": 0.0,
+      "note": "Single sea-level condition, normalized with the FD004 regime-0 scaler."
+    },
+    "fd003_check": {
+      "expected": "HPC and fan",
+      "engines": 100,
+      "hpc_pct": 56.0,
+      "fan_pct": 44.0,
+      "note": "Single sea-level condition, normalized with the FD004 regime-0 scaler."
+    }
+  },
+  "transfer": {
+    "source": "FD002 (six conditions, HPC only)",
+    "target": "FD004 (six conditions, HPC and fan)",
+    "variants": [
+      {
+        "variant": "No self-calibration",
+        "detail": "FD002 model applied to FD004 as is",
+        "rmse": 22.76,
+        "mae": 16.51,
+        "nasa_score": 7513.6,
+        "mean_nasa_score": 30.3,
+        "empirical_coverage_pct_90": 68.55,
+        "mpiw_cycles_90": 41.74,
+        "missed_removals": 12
+      },
+      {
+        "variant": "Label-free fleet adaptation",
+        "detail": "Label-shift-weighted CQR on unlabeled FD004 predictions",
+        "rmse": 22.76,
+        "mae": 16.51,
+        "nasa_score": 7513.6,
+        "mean_nasa_score": 30.3,
+        "empirical_coverage_pct_90": 68.55,
+        "mpiw_cycles_90": 41.73,
+        "missed_removals": 12
+      },
+      {
+        "variant": "Recalibrate with 25 new failures",
+        "detail": "Conformal corrections refit on 25 FD004 run-to-failure engines",
+        "rmse": 22.76,
+        "mae": 16.51,
+        "nasa_score": 7513.6,
+        "mean_nasa_score": 30.3,
+        "empirical_coverage_pct_90": 91.53,
+        "mpiw_cycles_90": 76.42,
+        "missed_removals": 1
+      },
+      {
+        "variant": "Retrain + recalibrate",
+        "detail": "Model refit with 15 FD004 engines, calibrated on 10",
+        "rmse": 23.87,
+        "mae": 17.02,
+        "nasa_score": 4875.4,
+        "mean_nasa_score": 19.66,
+        "empirical_coverage_pct_90": 91.53,
+        "mpiw_cycles_90": 57.82,
+        "missed_removals": 1
+      }
+    ],
+    "drift_detection": {
+      "threshold": 0.695,
+      "in_domain_flag_rate_pct": 5.8,
+      "shifted_flag_rate_pct": 46.8,
+      "shifted_by_fault_hypothesis": {
+        "FAN_DEGRADATION": {
+          "engines": 26,
+          "flag_rate_pct": 92.3
+        },
+        "HPC_DEGRADATION": {
+          "engines": 62,
+          "flag_rate_pct": 32.3
+        },
+        "NO_CLEAR_SIGNATURE": {
+          "engines": 160,
+          "flag_rate_pct": 45.0
+        }
+      },
+      "note": "Rate of test engines flagged at their last observed cycle. In-domain = FD002 test set."
+    }
+  },
+  "runtime_seconds": 232
+}

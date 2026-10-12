@@ -1,34 +1,24 @@
 """
-TwinAero - Drift Detection & Self-Calibration API
+TwinAero - Twin discrepancy and self-calibration endpoints
 """
 
-from fastapi import APIRouter, HTTPException, Path
-from backend.services.twin_service import DigitalTwinService
+from fastapi import APIRouter, Path
+
+from backend.api.errors import service_errors
 from backend.models.schemas import CalibrationTriggerRequest
+from backend.services.twin_service import DigitalTwinService
 
 router = APIRouter(prefix="/drift", tags=["Drift & Calibration"])
 
 
 @router.get("/{engine_id}")
 def get_engine_drift_status(engine_id: int = Path(..., ge=1, le=300)):
-    """Returns drift metrics and self-calibration status for engine."""
-    service = DigitalTwinService.get_instance()
-    try:
-        detail = service.get_engine_detail(engine_id)
-        return detail['drift_status']
-    except KeyError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    with service_errors():
+        return DigitalTwinService.get_instance().get_drift(engine_id)
 
 
 @router.post("/recalibrate")
 def trigger_recalibration(req: CalibrationTriggerRequest):
-    """Triggers self-calibration update for specified engine."""
-    service = DigitalTwinService.get_instance()
-    try:
-        return service.trigger_self_calibration(req.engine_id)
-    except KeyError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Re-runs the discrepancy check and applies the self-calibration policy."""
+    with service_errors():
+        return DigitalTwinService.get_instance().trigger_self_calibration(req.engine_id)

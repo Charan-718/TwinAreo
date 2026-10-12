@@ -15,7 +15,8 @@ SETTING_COLS = ['setting_1', 'setting_2', 'setting_3']
 SENSOR_COLS = [f'sensor_{i}' for i in range(1, 22)]
 COLUMN_NAMES = ['engine_id', 'cycle'] + SETTING_COLS + SENSOR_COLS
 
-# Descriptive mapping for aerospace digital twin visualization
+# Channel mnemonics as documented in Saxena et al. (2008), Table 2. The dataset itself
+# ships unlabeled columns; these names are a literature mapping, not measured metadata.
 SENSOR_METADATA = {
     'sensor_1': {'name': 'T2', 'desc': 'Total temperature at fan inlet', 'unit': '°R'},
     'sensor_2': {'name': 'T24', 'desc': 'Total temperature at LPC outlet', 'unit': '°R'},
@@ -31,9 +32,9 @@ SENSOR_METADATA = {
     'sensor_12': {'name': 'phi', 'desc': 'Ratio of fuel flow to Ps30', 'unit': 'pps/psi'},
     'sensor_13': {'name': 'NRf', 'desc': 'Corrected fan speed', 'unit': 'rpm'},
     'sensor_14': {'name': 'NRc', 'desc': 'Corrected core speed', 'unit': 'rpm'},
-    'sensor_15': {'name': 'BPR', 'desc': 'Bypass Ratio', 'unit': '-'},
+    'sensor_15': {'name': 'BPR', 'desc': 'Bypass ratio', 'unit': '-'},
     'sensor_16': {'name': 'farB', 'desc': 'Burner fuel-air ratio', 'unit': '-'},
-    'sensor_17': {'name': 'htBleed', 'desc': 'Bleed Enthalpy', 'unit': 'BTU/lbm'},
+    'sensor_17': {'name': 'htBleed', 'desc': 'Bleed enthalpy', 'unit': 'BTU/lbm'},
     'sensor_18': {'name': 'Nf_dmd', 'desc': 'Demanded fan speed', 'unit': 'rpm'},
     'sensor_19': {'name': 'PCNfR_dmd', 'desc': 'Demanded corrected fan speed', 'unit': 'rpm'},
     'sensor_20': {'name': 'W31', 'desc': 'HPT coolant bleed', 'unit': 'lbm/s'},
@@ -168,3 +169,39 @@ class CMAPSSDataLoader:
             feats['fan_degrade_index'] = 0.0
 
         return feats
+
+
+# ---------------------------------------------------------------------------
+# Shared feature construction (used by training, experiments and the API)
+# ---------------------------------------------------------------------------
+
+def twin_feature_columns() -> List[str]:
+    """Features for the Digital Twin model: regime-normalized sensors, rolling stats, indices."""
+    return [f'{s}_norm' for s in ACTIVE_SENSORS] + \
+           [f'{s}_norm_roll_mean' for s in ACTIVE_SENSORS] + \
+           [f'{s}_norm_roll_std' for s in ACTIVE_SENSORS] + \
+           SETTING_COLS + ['hpc_degrade_index', 'fan_degrade_index']
+
+
+def conventional_feature_columns() -> List[str]:
+    """Conventional baseline: raw sensor snapshot and operating settings, no regime handling."""
+    return SETTING_COLS + list(ACTIVE_SENSORS)
+
+
+def build_twin_features(loader: 'CMAPSSDataLoader', df: pd.DataFrame, window: int = 10) -> pd.DataFrame:
+    """Regime standardization followed by temporal feature extraction."""
+    return loader.extract_features(loader.standardize_by_regime(df), window=window)
+
+
+def split_engines(engine_ids, holdout_frac: float = 0.2, seed: int = 7) -> Tuple[np.ndarray, np.ndarray]:
+    """Engine-level split so no trajectory contributes to both training and calibration."""
+    ids = np.array(sorted(set(engine_ids)))
+    rng = np.random.default_rng(seed)
+    rng.shuffle(ids)
+    n_hold = max(1, int(round(len(ids) * holdout_frac)))
+    return np.sort(ids[n_hold:]), np.sort(ids[:n_hold])
+
+
+def last_cycle_rows(df: pd.DataFrame) -> pd.DataFrame:
+    """Final observed cycle of every engine (the C-MAPSS test evaluation point)."""
+    return df.groupby('engine_id').tail(1).reset_index(drop=True)

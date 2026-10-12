@@ -1,132 +1,120 @@
 """
-TwinAero - End-to-End Model Training, Calibration, and Evaluation Script
-Executes on NASA C-MAPSS FD004 (248 training engines, 249 test engines,
-6 operating conditions, 2 degradation modes).
-Saves models and benchmarks to ml/models/.
+TwinAero - End-to-end training, calibration and benchmark on NASA C-MAPSS FD004
+
+Engine-level protocol (no trajectory is used for both fitting and calibrating a component):
+  * RUL model and quantile models: cross-conformal calibration. 5 folds over all 249
+    training engines give out-of-fold nonconformity scores; final models use all engines.
+  * Regime scaler, healthy-state reference and drift reference: fitted on an 80% engine
+    split; the anomaly and drift thresholds are set on the remaining 20% (drift scores use
+    out-of-fold RUL predictions).
+  * The official FD004 test set (last observed cycle, RUL clipped at 125) is used for
+    reporting only.
+
+Artifacts are written to ml/models/. They are joblib files produced by this script and
+loaded only by this repository's backend; do not load joblib files from other sources.
 """
 
+import json
 import os
 import sys
-import json
+import time
+
+import joblib
 import numpy as np
 import pandas as pd
 
-# Add repo root to python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from ml.preprocessing.loader import CMAPSSDataLoader, ACTIVE_SENSORS, SENSOR_COLS
-from ml.rul.predictor import RULPredictor, nasa_scoring_function
-from ml.uncertainty.conformal import ConformalPredictor
 from ml.anomaly.fault_classifier import FaultClassifier
-import joblib
+from ml.anomaly.health_monitor import HealthStateMonitor
+from ml.drift.detector import DriftDetector
+from ml.pipeline import evaluate_last_cycle, fit_twin_cross_conformal, prepare_subset
+from ml.preprocessing.loader import build_twin_features
+
+MODELS_DIR = 'ml/models'
+
+
+def drift_scores(detector: DriftDetector, feats, oof, stride: int = 10):
+    """Scores on held-out engines, using out-of-fold RUL predictions."""
+    scores = []
+    lookup = oof.set_index(['engine_id', 'cycle'])['oof_pred']
+    for eid, g in feats.groupby('engine_id'):
+        preds = lookup.loc[eid].reindex(g['cycle']).values
+        for i in range(detector.window, len(g) + 1, stride):
+            scores.append(detector.score(g.iloc[:i], float(preds[i - 1]))['drift_score'])
+    return np.array([s for s in scores if s is not None])
 
 
 def run_pipeline():
-    print("=" * 65)
-    print(" TwinAero ML Pipeline: NASA C-MAPSS FD004 Benchmark Training ")
-    print("=" * 65)
+    t0 = time.time()
+    print('TwinAero training: NASA C-MAPSS FD004')
 
-    data_loader = CMAPSSDataLoader(data_dir='data/raw', max_rul_clip=125)
-    print("\n[1/6] Loading C-MAPSS FD004 dataset...")
-    train_df, test_df, rul_true = data_loader.load_dataset('FD004')
-    print(f"  Training records: {len(train_df):,} rows from {train_df['engine_id'].nunique()} run-to-failure engines")
-    print(f"  Test records:     {len(test_df):,} rows from {test_df['engine_id'].nunique()} hold-out engines")
-    print(f"  Ground truth RUL: {len(rul_true)} test units")
+    data = prepare_subset('FD004')
+    print(f'  proper-train engines: {len(data.train_ids)}, calibration engines: {len(data.cal_ids)}, '
+          f'test engines: {data.test.engine_id.nunique()}')
 
-    print("\n[2/6] Fitting operating condition regime standardizers (6 flight regimes)...")
-    data_loader.fit_regime_standardization(train_df)
-    train_norm = data_loader.standardize_by_regime(train_df)
-    test_norm = data_loader.standardize_by_regime(test_df)
+    train_all = pd.concat([data.train, data.cal], ignore_index=True)
+    twin, oof = fit_twin_cross_conformal(train_all)
+    results = evaluate_last_cycle(twin, data.test, data.test_rul)
+    print(f"  test RMSE {results['point']['rmse']}  MAE {results['point']['mae']}  NASA score {results['point']['nasa_score']}")
+    for method in ('split', 'cqr', 'cqr_fleet_adapted'):
+        for lv, m in results[method].items():
+            print(f"  {method:18s} {float(lv):.0%}: coverage {m['empirical_coverage_pct']}%  width {m['mpiw_cycles']}")
 
-    print("\n[3/6] Extracting temporal degradation features...")
-    train_feats = data_loader.extract_features(train_norm, window=10)
-    test_feats = data_loader.extract_features(test_norm, window=10)
+    monitor = HealthStateMonitor().fit(data.train).calibrate_threshold(data.cal)
+    print(f'  anomaly threshold: {monitor.threshold:.2f}')
 
-    # Feature selection: normalized sensors, rolling stats, operating settings, degradation indices
-    feature_cols = [f'{s}_norm' for s in ACTIVE_SENSORS] + \
-                   [f'{s}_norm_roll_mean' for s in ACTIVE_SENSORS] + \
-                   [f'{s}_norm_roll_std' for s in ACTIVE_SENSORS] + \
-                   ['setting_1', 'setting_2', 'setting_3', 'hpc_degrade_index', 'fan_degrade_index']
+    # Fault modes: all FD004 run-to-failure engines, identified against FD002 (HPC only),
+    # both normalized with the FD004 regime scaler (same six operating conditions).
+    fd004_all = build_twin_features(data.loader, data.loader.load_dataset('FD004')[0])
+    fd002_all = build_twin_features(data.loader, data.loader.load_dataset('FD002')[0])
+    fault = FaultClassifier().fit(fd004_all, fd002_all)
+    print(f"  fault modes: {fault.fit_report['cluster_sizes']}, FD002 -> HPC {fault.fit_report['fd002_assigned_to_hpc_pct']}%")
 
-    X_train = train_feats[feature_cols].fillna(0)
-    y_train = train_feats['clipped_rul'].values
+    detector = DriftDetector().fit(data.train)
+    detector.calibrate_threshold(drift_scores(detector, data.cal, oof))
+    print(f'  drift threshold: {detector.threshold:.3f}')
 
-    print(f"  Feature matrix shape: {X_train.shape}")
+    os.makedirs(MODELS_DIR, exist_ok=True)
+    twin.rul.save(os.path.join(MODELS_DIR, 'rul_predictor.joblib'))
+    twin.split.save(os.path.join(MODELS_DIR, 'conformal_predictor.joblib'))
+    twin.cqr.save(os.path.join(MODELS_DIR, 'cqr_predictor.joblib'))
+    monitor.save(os.path.join(MODELS_DIR, 'health_monitor.joblib'))
+    fault.save(os.path.join(MODELS_DIR, 'fault_classifier.joblib'))
 
-    print("\n[4/6] Training RUL Prognostic Ensemble...")
-    rul_predictor = RULPredictor()
-    rul_predictor.fit(X_train, y_train)
+    joblib.dump({'regime_scaler': data.loader.regime_scaler}, os.path.join(MODELS_DIR, 'regime_scaler.joblib'))
+    joblib.dump(detector.__dict__, os.path.join(MODELS_DIR, 'drift_detector.joblib'))
 
-    train_preds = rul_predictor.predict(X_train)
-    train_metrics = rul_predictor.evaluate(y_train, train_preds)
-    print(f"  Train RMSE: {train_metrics['rmse']} cycles | MAE: {train_metrics['mae']} cycles")
-
-    print("\n[5/6] Conformal Uncertainty Calibration (90% Confidence)...")
-    # Split-conformal calibration on validation engines (units 200..248)
-    val_units = train_feats['engine_id'] >= 200
-    X_val = train_feats[val_units][feature_cols].fillna(0)
-    y_val = train_feats[val_units]['clipped_rul'].values
-    val_preds = rul_predictor.predict(X_val)
-
-    conformal = ConformalPredictor(alpha=0.10)
-    conformal.calibrate(y_val, val_preds)
-    print(f"  Conformal nonconformity quantile q (90%): {conformal.q_value:.2f} cycles")
-
-    print("\n[6/6] Evaluating on Hold-out Test Fleet (FD004)...")
-    # Extract final cycle for each test engine
-    last_test_rows = test_feats.groupby('engine_id').last().reset_index()
-    X_test_last = last_test_rows[feature_cols].fillna(0)
-    test_preds = rul_predictor.predict(X_test_last)
-
-    # Compare against ground truth test RUL (clipped at 125 for standard benchmark consistency)
-    y_test_eval = np.minimum(rul_true, 125.0)
-    test_metrics = rul_predictor.evaluate(y_test_eval, test_preds)
-    
-    # Uncertainty intervals on test engines
-    lower_bounds, upper_bounds, widths = conformal.predict_interval(test_preds)
-    coverage_metrics = conformal.evaluate_coverage(y_test_eval, lower_bounds, upper_bounds)
-
-    print("\n" + "=" * 65)
-    print(" BENCHMARK RESULTS (NASA C-MAPSS FD004 Test Fleet):")
-    print(f"  Test RMSE:               {test_metrics['rmse']} cycles")
-    print(f"  Test MAE:                {test_metrics['mae']} cycles")
-    print(f"  NASA Scoring Metric:     {test_metrics['nasa_score']}")
-    print(f"  Mean NASA Score/Engine:  {test_metrics['mean_nasa_score']}")
-    print(f"  Empirical Coverage (90%): {coverage_metrics['empirical_coverage_pct']}% (Target: 90.0%)")
-    print(f"  Mean Interval Width:     {coverage_metrics['mpiw_cycles']} cycles")
-    print("=" * 65)
-
-    # Save artifacts
-    models_dir = 'ml/models'
-    os.makedirs(models_dir, exist_ok=True)
-    rul_predictor.save(os.path.join(models_dir, 'rul_predictor.joblib'))
-    conformal.save(os.path.join(models_dir, 'conformal_predictor.joblib'))
-    joblib.dump(data_loader, os.path.join(models_dir, 'data_loader.joblib'))
-
-    benchmark_summary = {
+    summary = {
         'dataset': 'NASA C-MAPSS FD004',
-        'train_engines': int(train_df['engine_id'].nunique()),
-        'test_engines': int(test_df['engine_id'].nunique()),
+        'protocol': '5-fold cross-conformal calibration over FD004 training engines; anomaly and drift thresholds '
+                    'from a held-out 20% engine split; official test set evaluated at the last observed cycle, RUL clipped at 125.',
+        'train_engines': int(len(data.train_ids) + len(data.cal_ids)),
+        'proper_train_engines': int(len(data.train_ids)),
+        'calibration_engines': int(len(data.cal_ids)),
+        'test_engines': int(data.test.engine_id.nunique()),
         'operating_conditions': 6,
-        'fault_modes': ['High-Pressure Compressor (HPC) Degradation', 'Fan Degradation'],
+        'fault_modes': ['High-pressure compressor (HPC) degradation', 'Fan degradation'],
         'metrics': {
-            'train_rmse': train_metrics['rmse'],
-            'train_mae': train_metrics['mae'],
-            'test_rmse': test_metrics['rmse'],
-            'test_mae': test_metrics['mae'],
-            'nasa_score': test_metrics['nasa_score'],
-            'mean_nasa_score': test_metrics['mean_nasa_score'],
-            'target_coverage_pct': coverage_metrics['target_confidence_pct'],
-            'empirical_coverage_pct': coverage_metrics['empirical_coverage_pct'],
-            'mpiw_cycles': coverage_metrics['mpiw_cycles'],
-            'coverage_valid': coverage_metrics['is_valid']
-        }
+            'test_rmse': results['point']['rmse'],
+            'test_mae': results['point']['mae'],
+            'nasa_score': results['point']['nasa_score'],
+            'mean_nasa_score': results['point']['mean_nasa_score'],
+            'interval_method': 'CQR, fleet-adapted (label-shift weighted)',
+            'target_coverage_pct': results['cqr_fleet_adapted']['0.9']['target_coverage_pct'],
+            'empirical_coverage_pct': results['cqr_fleet_adapted']['0.9']['empirical_coverage_pct'],
+            'mpiw_cycles': results['cqr_fleet_adapted']['0.9']['mpiw_cycles'],
+        },
+        'intervals': {k: results[k] for k in ('split', 'cqr', 'cqr_fleet_adapted')},
+        'fleet_rul_distribution_estimate': twin.cqr.fleet_rul_distribution,
+        'split_conformal_q90': round(twin.split.q_value, 2),
+        'anomaly_threshold': round(monitor.threshold, 3),
+        'drift_threshold': round(detector.threshold, 3),
+        'fault_modes_fit': fault.fit_report,
     }
-
-    with open(os.path.join(models_dir, 'benchmark_summary.json'), 'w') as f:
-        json.dump(benchmark_summary, f, indent=2)
-
-    print(f"\nArtifacts successfully serialized to {models_dir}/")
+    with open(os.path.join(MODELS_DIR, 'benchmark_summary.json'), 'w') as f:
+        json.dump(summary, f, indent=2)
+    print(f'Artifacts written to {MODELS_DIR}/ in {time.time() - t0:.0f}s')
 
 
 if __name__ == '__main__':
