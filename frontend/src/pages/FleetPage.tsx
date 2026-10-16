@@ -7,6 +7,7 @@ import { Segmented } from '../components/ui/Segmented';
 import { EmptyState } from '../components/ui/Feedback';
 import { Icon } from '../components/ui/Icon';
 import { StackedHistogram } from '../components/charts/StackedHistogram';
+import { Fleet3DViewer } from '../components/fleet/Fleet3DViewer';
 import { FAULT_SHORT, fmt } from '../lib/format';
 import { href } from '../lib/router';
 import { ActionCode, EngineSummary, FleetOverview } from '../lib/types';
@@ -65,6 +66,8 @@ export const FleetPage: React.FC<{ fleet: FleetOverview }> = ({ fleet }) => {
         title="Fleet status"
         description="Live telemetry, conservative remaining-life estimates (90% conformal lower bound), and automated policy dispatches across all 248 turbofan units."
       />
+
+      <Fleet3DViewer />
 
       <StatStrip className="mb-6">
         <Stat label="Total Units" value={fleet.total_engines} hint="Six flight regimes, two fault modes" />
