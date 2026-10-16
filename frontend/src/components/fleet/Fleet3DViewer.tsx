@@ -57,11 +57,15 @@ export const Fleet3DViewer: React.FC<Fleet3DViewerProps> = ({ className = '' }) 
               <div>AIRFRAME//STATUS: NOMINAL</div>
             </div>
 
-            {/* Sketchfab Embedded 3D Viewer (Shifted up to clip any header/avatar) */}
-            <div className="w-full relative aspect-video min-h-[320px] max-h-[520px] md:h-[440px] lg:h-[480px] overflow-hidden bg-black">
+            {/* Sketchfab Embedded 3D Viewer (Shifted up to clip header/avatar & zoomed out for optimal framing) */}
+            <div className="w-full relative aspect-video min-h-[360px] max-h-[580px] md:h-[480px] lg:h-[520px] overflow-hidden bg-black flex items-center justify-center">
               <iframe
                 title="Future Airliner 3D Digital Twin"
                 className="w-full border-0 absolute left-0 right-0 -top-14 h-[calc(100%+56px)]"
+                style={{
+                  transform: 'scale(0.85)',
+                  transformOrigin: '50% 52%',
+                }}
                 src="https://sketchfab.com/models/62fdd10d3e004721a29bd47188165ca8/embed?autostart=1&ui_infos=0&ui_watermark=0&ui_theme=dark&preload=1"
                 allow="autoplay; fullscreen; xr-spatial-tracking"
                 allowFullScreen

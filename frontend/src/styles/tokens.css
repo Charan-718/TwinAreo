@@ -12,57 +12,57 @@
 :root {
   color-scheme: dark;
 
-  /* ── 60% Dominant Canvas (Cyber Obsidian Void) ── */
-  --color-bg: #04080c;
-  --color-surface: #071219;
-  --color-surface-elevated: #0c1a24;
-  --color-surface-interactive: #122533;
-  --color-surface-sunken: #020508;
+  /* ── 60% Dominant Canvas (Carbon Stealth & Obsidian Titanium) ── */
+  --color-bg: #090a0d;
+  --color-surface: #0f1117;
+  --color-surface-elevated: #161822;
+  --color-surface-interactive: #1f2230;
+  --color-surface-sunken: #050608;
 
-  /* ── Text Hierarchy (Phosphor Terminal) ── */
-  --color-text-primary: #e6fff6;
-  --color-text-secondary: #74a89f;
-  --color-text-muted: #3a6860;
-  --color-text-inverse: #020508;
+  /* ── Text Hierarchy (Carbon Titanium & Warm Silver) ── */
+  --color-text-primary: #fcfbfa;
+  --color-text-secondary: #a3a7b5;
+  --color-text-muted: #5e6272;
+  --color-text-inverse: #090a0d;
 
   /* ── 30% Structural Cyber Borders ── */
-  --color-border: #0e332c;
-  --color-border-subtle: #08211c;
-  --color-border-strong: #00ff9d;
+  --color-border: #232634;
+  --color-border-subtle: #161822;
+  --color-border-strong: #ffb703;
 
-  /* ── 10% Cyber Actions & Phosphor Accents ── */
-  --color-primary: #00ff9d;
-  --color-primary-hover: #38ffb2;
-  --color-primary-active: #00cc7d;
-  --color-primary-soft: rgba(0, 255, 157, 0.12);
-  --color-primary-text: #00ff9d;
-  --color-on-primary: #010a06;
+  /* ── 10% Actions & Solar Amber/Gold Accents (From 3D Model VTOL Rings & Edge Piping) ── */
+  --color-primary: #ffb703;
+  --color-primary-hover: #ffc72c;
+  --color-primary-active: #e69500;
+  --color-primary-soft: rgba(255, 183, 3, 0.14);
+  --color-primary-text: #ffb703;
+  --color-on-primary: #080602;
 
-  /* Accent: Cyberspace Cyan & Laser Red (From Reference Image 1) */
-  --color-accent: #00f0ff;
-  --color-accent-hover: #3be4ff;
-  --color-accent-soft: rgba(0, 240, 255, 0.12);
+  /* Accent: Radiant Flame Orange (From Glowing Aerodynamic Edge Trim) */
+  --color-accent: #ff7b00;
+  --color-accent-hover: #ff9124;
+  --color-accent-soft: rgba(255, 123, 0, 0.14);
 
-  /* Semantic Status */
-  --color-success: #00ff9d;
-  --color-success-soft: rgba(0, 255, 157, 0.12);
-  --color-warning: #ffb800;
-  --color-warning-soft: rgba(255, 184, 0, 0.12);
-  --color-error: #ff0055;
-  --color-error-soft: rgba(255, 0, 85, 0.15);
-  --color-info: #00f0ff;
-  --color-info-soft: rgba(0, 240, 255, 0.12);
+  /* Semantic Status (Harmonized with Carbon & Gold Palette) */
+  --color-success: #ffb703;
+  --color-success-soft: rgba(255, 183, 3, 0.14);
+  --color-warning: #ff7b00;
+  --color-warning-soft: rgba(255, 123, 0, 0.14);
+  --color-error: #ff2a55;
+  --color-error-soft: rgba(255, 42, 85, 0.15);
+  --color-info: #ffd000;
+  --color-info-soft: rgba(255, 208, 0, 0.14);
 
   /* Focus Indicator */
-  --color-focus: #00ff9d;
+  --color-focus: #ffb703;
 
-  /* ── Charts: Neon Phosphor Data Series ── */
-  --chart-1: #00ff9d;
-  --chart-2: #ffb800;
-  --chart-3: #00f0ff;
-  --chart-grid: rgba(0, 255, 157, 0.08);
-  --chart-axis: rgba(0, 255, 157, 0.25);
-  --chart-band-opacity: 0.15;
+  /* ── Charts: Solar Amber & Molten Orange Data Series ── */
+  --chart-1: #ffb703;
+  --chart-2: #ff7b00;
+  --chart-3: #ffd000;
+  --chart-grid: rgba(255, 183, 3, 0.08);
+  --chart-axis: rgba(255, 183, 3, 0.25);
+  --chart-band-opacity: 0.16;
 
   /* ── Cut-Edge Clip-Path Geometry ── */
   --clip-cut-corner: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
@@ -73,10 +73,10 @@
   --clip-stat: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
 
   /* ── Glow & Illumination Effects ── */
-  --glow-primary: 0 0 12px rgba(0, 255, 157, 0.4), 0 0 24px rgba(0, 255, 157, 0.15);
-  --glow-cyan: 0 0 12px rgba(0, 240, 255, 0.4);
-  --glow-crimson: 0 0 12px rgba(255, 0, 85, 0.4);
-  --glow-border: 0 0 8px rgba(0, 255, 157, 0.25);
+  --glow-primary: 0 0 14px rgba(255, 183, 3, 0.45), 0 0 28px rgba(255, 183, 3, 0.2);
+  --glow-cyan: 0 0 14px rgba(255, 123, 0, 0.45);
+  --glow-crimson: 0 0 12px rgba(255, 42, 85, 0.4);
+  --glow-border: 0 0 8px rgba(255, 183, 3, 0.3);
 
   /* ── Typography Scale (Hacker / Cyber Deck) ── */
   --font-family-display: 'Chakra Petch', 'Orbitron', system-ui, sans-serif;
@@ -162,48 +162,48 @@
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --color-bg: #f2f7f5;
+  --color-bg: #f5f4f0;
   --color-surface: #ffffff;
-  --color-surface-elevated: #e8f2ee;
-  --color-surface-interactive: #d9e9e3;
-  --color-surface-sunken: #e2ede8;
+  --color-surface-elevated: #eceae3;
+  --color-surface-interactive: #e0ded4;
+  --color-surface-sunken: #e9e7df;
 
-  --color-text-primary: #051a14;
-  --color-text-secondary: #275249;
-  --color-text-muted: #537d74;
+  --color-text-primary: #121318;
+  --color-text-secondary: #474a58;
+  --color-text-muted: #797d8e;
   --color-text-inverse: #ffffff;
 
-  --color-border: #b8d9cf;
-  --color-border-subtle: #d0e7e0;
-  --color-border-strong: #00aa66;
+  --color-border: #d2cec2;
+  --color-border-subtle: #e4e1d6;
+  --color-border-strong: #d97706;
 
-  --color-primary: #00995c;
-  --color-primary-hover: #00b36b;
-  --color-primary-active: #00804d;
-  --color-primary-soft: rgba(0, 153, 92, 0.1);
-  --color-primary-text: #008550;
+  --color-primary: #d97706;
+  --color-primary-hover: #b45309;
+  --color-primary-active: #92400e;
+  --color-primary-soft: rgba(217, 119, 6, 0.1);
+  --color-primary-text: #b45309;
   --color-on-primary: #ffffff;
 
-  --color-accent: #0088cc;
-  --color-accent-hover: #0099e6;
-  --color-accent-soft: rgba(0, 136, 204, 0.1);
+  --color-accent: #ea580c;
+  --color-accent-hover: #c2410c;
+  --color-accent-soft: rgba(234, 88, 12, 0.1);
 
-  --color-success: #00995c;
-  --color-success-soft: rgba(0, 153, 92, 0.1);
-  --color-warning: #cc7a00;
-  --color-warning-soft: rgba(204, 122, 0, 0.1);
-  --color-error: #e6004c;
-  --color-error-soft: rgba(230, 0, 76, 0.1);
-  --color-info: #0088cc;
-  --color-info-soft: rgba(0, 136, 204, 0.1);
+  --color-success: #d97706;
+  --color-success-soft: rgba(217, 119, 6, 0.1);
+  --color-warning: #ea580c;
+  --color-warning-soft: rgba(234, 88, 12, 0.1);
+  --color-error: #dc2626;
+  --color-error-soft: rgba(220, 38, 38, 0.1);
+  --color-info: #ca8a04;
+  --color-info-soft: rgba(202, 138, 4, 0.1);
 
-  --color-focus: #00995c;
+  --color-focus: #d97706;
 
-  --chart-1: #00995c;
-  --chart-2: #cc7a00;
-  --chart-3: #0088cc;
-  --chart-grid: #d0e7e0;
-  --chart-axis: #7fa89f;
+  --chart-1: #d97706;
+  --chart-2: #ea580c;
+  --chart-3: #ca8a04;
+  --chart-grid: #e4e1d6;
+  --chart-axis: #a8a396;
   --chart-band-opacity: 0.16;
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);

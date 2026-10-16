@@ -21,8 +21,8 @@ export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
   height = '100%',
   className = '',
   physicalColor = '#0c203b',
-  cyanColor = '#00f0ff',
-  emeraldColor = '#00ff9d',
+  cyanColor = 'var(--color-primary, #ffb703)',
+  emeraldColor = 'var(--color-accent, #ff7b00)',
   ...props
 }) => {
   return (
