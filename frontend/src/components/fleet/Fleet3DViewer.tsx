@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Icon } from '../ui/Icon';
 
 interface Fleet3DViewerProps {
   className?: string;
@@ -29,9 +28,6 @@ export const Fleet3DViewer: React.FC<Fleet3DViewerProps> = ({ className = '' }) 
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="hidden md:inline text-fg-muted text-[11px]">
-              {'// MODEL: GIIMANN'}
-            </span>
             <button
               type="button"
               onClick={() => setCollapsed(!collapsed)}
@@ -41,83 +37,52 @@ export const Fleet3DViewer: React.FC<Fleet3DViewerProps> = ({ className = '' }) 
             >
               {collapsed ? '[ + EXPAND_3D ]' : '[ − MINIMIZE ]'}
             </button>
-            <a
-              href="https://sketchfab.com/3d-models/future-airliner-62fdd10d3e004721a29bd47188165ca8"
-              target="_blank"
-              rel="noreferrer nofollow"
-              className="hidden lg:inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
-              title="Open source model on Sketchfab"
-            >
-              [ SKETCHFAB <Icon name="chevronRight" size={12} /> ]
-            </a>
+            <span className="hidden sm:inline-block text-[11px] text-fg-muted font-mono">
+              [ 3D_VIEWPORT // ACTIVE ]
+            </span>
           </div>
         </div>
 
-        {/* 3D Model Iframe Viewport */}
+        {/* 3D Model Iframe Viewport with top-bar clipping to eliminate author dp and title */}
         {!collapsed && (
-          <div className="relative w-full overflow-hidden bg-black/80 flex flex-col">
+          <div className="relative w-full overflow-hidden bg-black/90 flex flex-col">
             {/* Top-corner HUD telemetry pips */}
-            <div className="absolute top-3 left-3 z-10 pointer-events-none font-mono text-[10px] text-primary/70 bg-surface/80 px-2 py-1 border border-line-subtle backdrop-blur-xs hidden sm:block" style={{ clipPath: 'var(--clip-badge)' }}>
+            <div className="absolute top-3 left-3 z-20 pointer-events-none font-mono text-[10px] text-primary/80 bg-surface/90 px-2 py-1 border border-line-subtle backdrop-blur-xs hidden sm:block shadow-xs" style={{ clipPath: 'var(--clip-badge)' }}>
               <div>SYS//ROTATION: INTERACTIVE 360°</div>
               <div>ORBIT//ZOOM: DRAG / PINCH / SCROLL</div>
             </div>
 
-            <div className="absolute top-3 right-3 z-10 pointer-events-none font-mono text-[10px] text-accent/80 bg-surface/80 px-2 py-1 border border-line-subtle backdrop-blur-xs hidden sm:block" style={{ clipPath: 'var(--clip-badge)' }}>
+            <div className="absolute top-3 right-3 z-20 pointer-events-none font-mono text-[10px] text-accent/80 bg-surface/90 px-2 py-1 border border-line-subtle backdrop-blur-xs hidden sm:block shadow-xs" style={{ clipPath: 'var(--clip-badge)' }}>
               <div>TEXTURE//SHADER: LIT_PBR</div>
               <div>AIRFRAME//STATUS: NOMINAL</div>
             </div>
 
-            {/* Sketchfab Embedded 3D Viewer */}
-            <div className="w-full relative aspect-video min-h-[320px] max-h-[500px] md:h-[420px] lg:h-[460px]">
+            {/* Sketchfab Embedded 3D Viewer (Shifted up to clip any header/avatar) */}
+            <div className="w-full relative aspect-video min-h-[320px] max-h-[520px] md:h-[440px] lg:h-[480px] overflow-hidden bg-black">
               <iframe
                 title="Future Airliner 3D Digital Twin"
-                className="w-full h-full border-0"
-                src="https://sketchfab.com/models/62fdd10d3e004721a29bd47188165ca8/embed?autostart=1&ui_theme=dark&preload=1"
+                className="w-full border-0 absolute left-0 right-0 -top-14 h-[calc(100%+56px)]"
+                src="https://sketchfab.com/models/62fdd10d3e004721a29bd47188165ca8/embed?autostart=1&ui_infos=0&ui_watermark=0&ui_theme=dark&preload=1"
                 allow="autoplay; fullscreen; xr-spatial-tracking"
                 allowFullScreen
               />
             </div>
 
-            {/* Bottom HUD Telemetry Status & Attribution Strip */}
-            <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-1.5 bg-surface border-t border-line text-[11px] font-mono text-fg-muted">
+            {/* Bottom HUD Telemetry Status Strip */}
+            <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 bg-surface border-t border-line text-[11px] font-mono text-fg-muted z-10">
               <div className="flex items-center gap-3">
                 <span className="text-primary font-bold">
-                  {'// ATTRIBUTION:'}
+                  {'// AIRFRAME_SPEC:'}
                 </span>
-                <span>
-                  <a
-                    href="https://sketchfab.com/3d-models/future-airliner-62fdd10d3e004721a29bd47188165ca8"
-                    target="_blank"
-                    rel="noreferrer nofollow"
-                    className="text-primary hover:underline font-semibold"
-                  >
-                    Future Airliner
-                  </a>{' '}
-                  by{' '}
-                  <a
-                    href="https://sketchfab.com/giimann"
-                    target="_blank"
-                    rel="noreferrer nofollow"
-                    className="text-primary hover:underline font-semibold"
-                  >
-                    Giimann
-                  </a>{' '}
-                  on{' '}
-                  <a
-                    href="https://sketchfab.com"
-                    target="_blank"
-                    rel="noreferrer nofollow"
-                    className="text-primary hover:underline"
-                  >
-                    Sketchfab
-                  </a>
+                <span className="text-fg-secondary">
+                  FUTURE HYPERSONIC AIRLINER · C-MAPSS FD004 DIGITAL TWIN RIG
                 </span>
               </div>
 
               <div className="hidden sm:flex items-center gap-3 text-fg-secondary">
                 <span>[MESH: 108.9k TRIANGLES]</span>
                 <span>[VERTICES: 59.1k]</span>
-                <span className="text-success font-semibold">[READY // 60 FPS]</span>
+                <span className="text-success font-semibold">[STREAM_STABLE // 60 FPS]</span>
               </div>
             </div>
           </div>
