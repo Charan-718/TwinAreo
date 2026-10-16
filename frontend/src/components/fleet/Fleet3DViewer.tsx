@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { HackerLoader } from '../ui/HackerLoader';
 
 interface Fleet3DViewerProps {
   className?: string;
@@ -182,13 +183,15 @@ export const Fleet3DViewer: React.FC<Fleet3DViewerProps> = ({ className = '' }) 
               className="w-full relative aspect-video min-h-[360px] max-h-[580px] md:h-[480px] lg:h-[520px] overflow-hidden flex items-center justify-center"
               style={{ background: 'var(--color-bg)' }}
             >
-              {/* Sleek cyber telemetry loader while PBR mesh & WebGL canvas initialize */}
+              {/* Sleek cyber telemetry hacker radar loader while PBR mesh & WebGL canvas initialize */}
               {!isLoaded && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 pointer-events-none">
-                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin shadow-[0_0_12px_var(--color-primary)]" />
-                  <span className="font-mono text-[11px] text-primary/90 tracking-widest uppercase">
-                    [ INITIALIZING_3D_AIRFRAME_TWIN // STREAMING_PBR_MESH... ]
-                  </span>
+                <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none bg-surface/50 backdrop-blur-xs p-4">
+                  <HackerLoader
+                    size="lg"
+                    color="theme"
+                    variant="hybrid"
+                    label="INITIALIZING_3D_AIRFRAME_TWIN // STREAMING_PBR_MESH..."
+                  />
                 </div>
               )}
 

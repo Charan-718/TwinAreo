@@ -38,6 +38,10 @@ export function useRoute(): Route {
     const onChange = () => {
       setRoute(parseHash(window.location.hash));
       window.scrollTo({ top: 0 });
+      const mainEl = document.getElementById('main');
+      if (mainEl && typeof mainEl.scrollTo === 'function') {
+        mainEl.scrollTo({ top: 0 });
+      }
     };
     window.addEventListener('hashchange', onChange);
     return () => window.removeEventListener('hashchange', onChange);

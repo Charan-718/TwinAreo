@@ -5,6 +5,7 @@ import { EngineSummary } from '../../lib/types';
 import { Icon } from '../ui/Icon';
 import { Segmented } from '../ui/Segmented';
 import { AeroTwinIcon } from '../ui/AeroTwinIcon';
+import { DroneViewer3D } from '../drone/DroneViewer3D';
 
 interface NavItem {
   label: string;
@@ -233,7 +234,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   }, [drawerOpen]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg">
+    <div className="h-screen flex flex-col bg-bg overflow-hidden">
       <a
         href="#main"
         onClick={(e) => {
@@ -246,7 +247,7 @@ export const AppShell: React.FC<AppShellProps> = ({
       </a>
 
       {/* ─── HOLLYWOOD HACKER CYBER DECK HEADER ─── */}
-      <header className="sticky top-0 z-30 h-header w-full border-b border-line bg-surface/90 backdrop-blur-md shadow-xs">
+      <header className="shrink-0 h-header w-full border-b border-line bg-surface/90 backdrop-blur-md shadow-xs z-30">
         <div className="h-full w-full flex items-center justify-between gap-3 pl-3.5 pr-gutter max-w-container mx-auto">
           <div className="flex items-center gap-3 shrink-0">
             <button
@@ -305,16 +306,19 @@ export const AppShell: React.FC<AppShellProps> = ({
         </div>
       </header>
 
-      <div className="flex-1 flex max-w-container w-full mx-auto">
-        {/* ─── CYBER SIDEBAR NAVIGATION ─── */}
-        <aside className="hidden lg:block w-sidebar shrink-0 border-r border-line bg-surface/30">
-          <div className="sticky top-header max-h-[calc(100vh-var(--header-height))] overflow-y-auto px-3.5 py-6">
+      {/* ─── 3D DRONE DIGITAL TWIN OVERLAY (HIGHEST Z-INDEX, VIEWPORT NAVIGABLE) ─── */}
+      <DroneViewer3D />
+
+      <div className="flex-1 flex max-w-container w-full mx-auto min-h-0 overflow-hidden">
+        {/* ─── CYBER SIDEBAR NAVIGATION (FIXED IN VIEWPORT, SCROLL-Y BLOCKED) ─── */}
+        <aside className="hidden lg:block w-sidebar shrink-0 border-r border-line bg-surface/30 h-full overflow-hidden select-none">
+          <div className="px-3.5 py-6">
             <NavList route={route} engineId={engineId} />
           </div>
         </aside>
 
-        {/* ─── MAIN CONTENT VIEWPORT ─── */}
-        <main id="main" tabIndex={-1} className="flex-1 min-w-0 focus:outline-none flex flex-col justify-between">
+        {/* ─── MAIN CONTENT VIEWPORT (SCROLLS BESIDE FIXED SIDEBAR) ─── */}
+        <main id="main" tabIndex={-1} className="flex-1 min-w-0 focus:outline-none flex flex-col justify-between overflow-y-auto h-full">
           <div className="px-gutter py-6 md:py-8">{children}</div>
 
           <footer className="px-gutter pb-8 pt-4 mt-auto">

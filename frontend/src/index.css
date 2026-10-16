@@ -15,11 +15,14 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
-    overflow-y: scroll;
-    scrollbar-gutter: stable;
   }
 
   body {
@@ -31,8 +34,6 @@
     line-height: var(--line-height-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    min-height: 100vh;
-    overflow-x: hidden;
     position: relative;
   }
 
@@ -300,5 +301,14 @@
   }
   :root[data-theme='light'] select.select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 20 20' fill='%23d97706'%3E%3Cpolygon points='10,14 4,6 16,6'/%3E%3C/svg%3E");
+  }
+
+  @keyframes laser-sweep {
+    0% {
+      left: -30%;
+    }
+    100% {
+      left: 130%;
+    }
   }
 }
