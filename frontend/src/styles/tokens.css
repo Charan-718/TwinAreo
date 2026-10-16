@@ -5,7 +5,7 @@
  * Features:
  * - Angular geometric typography (Chakra Petch & Orbitron & Share Tech Mono)
  * - Cut-edge polygon clip-path card and panel geometry
- * - Cyber emerald phosphor (#00ff9d) + cyberspace cyan (#00f0ff) + laser crimson (#ff0055)
+ * - Vibrant Cyber Yellow (#ffff0d) + flame orange (#ff7b00) + laser crimson (#ff2a55)
  * - Circuit lines, tech bracket badges, and high-density telemetry readouts
  */
 
@@ -29,24 +29,24 @@
   /* ── 30% Structural Cyber Borders ── */
   --color-border: #60646e;
   --color-border-subtle: #45474e;
-  --color-border-strong: #ffb703;
+  --color-border-strong: #ffff0d;
 
-  /* ── 10% Actions & Solar Amber/Gold Accents ── */
-  --color-primary: #ffb703;
-  --color-primary-hover: #ffc72c;
-  --color-primary-active: #e69500;
-  --color-primary-soft: rgba(255, 183, 3, 0.2);
-  --color-primary-text: #ffd000;
-  --color-on-primary: #1a1a1a;
+  /* ── 10% Actions & Radiant Vibrant Yellow Accents (From 3D Engine Glow) ── */
+  --color-primary: #ffff0d;
+  --color-primary-hover: #ffff5c;
+  --color-primary-active: #e6e600;
+  --color-primary-soft: rgba(255, 255, 13, 0.16);
+  --color-primary-text: #ffff0d;
+  --color-on-primary: #121212;
 
-  /* Accent: Radiant Flame Orange (From Glowing Aerodynamic Edge Trim) */
+  /* Accent: Radiant Flame Orange (From Aerodynamic Edge Trim) */
   --color-accent: #ff7b00;
   --color-accent-hover: #ff9124;
   --color-accent-soft: rgba(255, 123, 0, 0.14);
 
-  /* Semantic Status (Harmonized with Carbon & Gold Palette) */
-  --color-success: #ffb703;
-  --color-success-soft: rgba(255, 183, 3, 0.14);
+  /* Semantic Status (Vibrant Yellow replaces Green for Nominal / Healthy / Success) */
+  --color-success: #ffff0d;
+  --color-success-soft: rgba(255, 255, 13, 0.16);
   --color-warning: #ff7b00;
   --color-warning-soft: rgba(255, 123, 0, 0.14);
   --color-error: #ff2a55;
@@ -55,14 +55,14 @@
   --color-info-soft: rgba(255, 208, 0, 0.14);
 
   /* Focus Indicator */
-  --color-focus: #ffb703;
+  --color-focus: #ffff0d;
 
-  /* ── Charts: Solar Amber & Molten Orange Data Series ── */
-  --chart-1: #ffb703;
+  /* ── Charts: Radiant Vibrant Yellow & Molten Orange Data Series ── */
+  --chart-1: #ffff0d;
   --chart-2: #ff7b00;
   --chart-3: #ffd000;
-  --chart-grid: rgba(255, 183, 3, 0.08);
-  --chart-axis: rgba(255, 183, 3, 0.25);
+  --chart-grid: rgba(255, 255, 13, 0.08);
+  --chart-axis: rgba(255, 255, 13, 0.25);
   --chart-band-opacity: 0.16;
 
   /* ── Cut-Edge Clip-Path Geometry ── */
@@ -74,10 +74,10 @@
   --clip-stat: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
 
   /* ── Glow & Illumination Effects ── */
-  --glow-primary: 0 0 14px rgba(255, 183, 3, 0.45), 0 0 28px rgba(255, 183, 3, 0.2);
+  --glow-primary: 0 0 14px rgba(255, 255, 13, 0.5), 0 0 28px rgba(255, 255, 13, 0.25);
   --glow-cyan: 0 0 14px rgba(255, 123, 0, 0.45);
   --glow-crimson: 0 0 12px rgba(255, 42, 85, 0.4);
-  --glow-border: 0 0 8px rgba(255, 183, 3, 0.3);
+  --glow-border: 0 0 8px rgba(255, 255, 13, 0.35);
 
   /* ── Typography Scale (Hacker / Cyber Deck) ── */
   --font-family-display: 'Chakra Petch', 'Orbitron', system-ui, sans-serif;

@@ -142,7 +142,7 @@ export const StackedHistogram: React.FC<Props> = ({
         </svg>
         {hover != null && (
           <div
-            className="absolute top-0 pointer-events-none border border-primary/50 bg-surface-elevated text-fg clip-cut-btn p-2.5 text-xs font-mono shadow-[0_0_15px_rgba(0,255,157,0.3)]"
+            className="absolute top-0 pointer-events-none border border-primary/50 bg-surface-elevated text-fg clip-cut-btn p-2.5 text-xs font-mono shadow-[0_0_15px_rgba(255,255,13,0.35)]"
             style={{
               left: Math.min(width - 160, pad.left + hover * bw + bw + 6),
             }}

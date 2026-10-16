@@ -31,7 +31,7 @@ export const Stat: React.FC<StatProps> = ({
           className={`${
             size === 'lg' ? 'text-metric' : 'text-xl'
           } font-bold tracking-tight text-fg font-mono tabular`}
-          style={{ textShadow: '0 0 10px rgba(0, 255, 157, 0.3)' }}
+          style={{ textShadow: '0 0 10px rgba(255, 255, 13, 0.4)' }}
         >
           {value}
         </span>

@@ -24,7 +24,7 @@ export const RangeField: React.FC<RangeFieldProps> = ({ label, value, min, max, 
         </label>
         <output
           htmlFor={id}
-          className="text-xs font-mono text-primary font-bold tabular px-2 py-0.5 bg-surface-sunken border border-primary/30 shadow-[0_0_8px_rgba(0,255,157,0.2)]"
+          className="text-xs font-mono text-primary font-bold tabular px-2 py-0.5 bg-surface-sunken border border-primary/30 shadow-[0_0_8px_rgba(255,255,13,0.3)]"
           style={{ clipPath: 'var(--clip-badge)' }}
         >
           {format(value)}

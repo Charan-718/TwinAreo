@@ -91,7 +91,7 @@ export const DriftPage: React.FC<{ engine: EngineDetail; onRecalibrated: () => v
                               width: `${Math.min(100, (c.ks_stat / maxKs) * 100)}%`,
                               clipPath: 'var(--clip-badge)',
                               backgroundColor: over ? 'var(--color-danger)' : 'var(--color-primary)',
-                              boxShadow: over ? '0 0 8px rgba(255, 0, 85, 0.7)' : '0 0 6px rgba(0, 255, 157, 0.5)',
+                              boxShadow: over ? '0 0 8px rgba(255, 0, 85, 0.7)' : '0 0 6px rgba(255, 255, 13, 0.6)',
                             }}
                           />
                           <div

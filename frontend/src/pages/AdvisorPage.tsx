@@ -51,7 +51,7 @@ export const AdvisorPage: React.FC<{ engine: EngineDetail }> = ({ engine }) => {
               <ol className="list-none p-0 m-0">
                 {a.trace.map((step, i) => (
                   <li key={step.agent} className="grid grid-cols-[2rem_1fr] gap-3 pb-5 last:pb-0 relative">
-                    <span className="w-7 h-7 clip-badge border border-primary bg-surface-elevated text-xs font-mono font-bold text-primary flex items-center justify-center tabular z-[1] shadow-[0_0_8px_rgba(0,255,157,0.3)]">
+                    <span className="w-7 h-7 clip-badge border border-primary bg-surface-elevated text-xs font-mono font-bold text-primary flex items-center justify-center tabular z-[1] shadow-[0_0_8px_rgba(255,255,13,0.35)]">
                       {i + 1}
                     </span>
                     {i < a.trace.length - 1 && <span className="absolute left-[0.85rem] top-7 bottom-0 w-px bg-line" aria-hidden="true" />}

@@ -34,7 +34,7 @@ const Meter: React.FC<{ label: string; value: number; max: number }> = ({ label,
           style={{
             width: `${pct}%`,
             clipPath: 'var(--clip-badge)',
-            boxShadow: '0 0 10px rgba(0, 255, 157, 0.6)',
+            boxShadow: '0 0 10px rgba(255, 255, 13, 0.6)',
           }}
         />
       </div>

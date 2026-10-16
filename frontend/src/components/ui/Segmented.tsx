@@ -63,7 +63,7 @@ export function Segmented<T extends string>({
               size === 'sm' ? 'h-7 px-3 text-xs' : 'h-8 px-4 text-xs md:text-sm'
             } font-display uppercase tracking-wider font-semibold whitespace-nowrap transition-all duration-fast clip-cut-btn focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary ${
               active
-                ? 'bg-primary text-primary-on shadow-[0_0_8px_rgba(0,255,157,0.4)]'
+                ? 'bg-primary text-primary-on shadow-[0_0_8px_rgba(255,255,13,0.4)]'
                 : 'text-fg-secondary hover:text-primary hover:bg-surface-interactive/60'
             }`}
           >

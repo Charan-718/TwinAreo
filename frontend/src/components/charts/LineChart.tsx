@@ -349,7 +349,7 @@ export const LineChart: React.FC<LineChartProps> = ({
 
         {hover != null && (
           <div
-            className="absolute top-1 z-10 pointer-events-none border border-primary/50 bg-surface-elevated text-fg clip-cut-btn p-2.5 text-xs shadow-[0_0_15px_rgba(0,255,157,0.3)] min-w-[10rem] font-mono"
+            className="absolute top-1 z-10 pointer-events-none border border-primary/50 bg-surface-elevated text-fg clip-cut-btn p-2.5 text-xs shadow-[0_0_15px_rgba(255,255,13,0.35)] min-w-[10rem] font-mono"
             style={tipOnRight ? { left: tipLeft + 12 } : { right: width - tipLeft + 12 }}
           >
             <div className="font-bold text-primary mb-1.5 tabular border-b border-line pb-1">

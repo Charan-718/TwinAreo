@@ -54,7 +54,7 @@ export const TwinStatePage: React.FC<{ engine: EngineDetail }> = ({ engine }) =>
                 onClick={() => setSelected(st.id)}
                 className={`text-left p-3 md:p-4 clip-cut-btn transition-all duration-fast ${
                   active
-                    ? 'bg-surface-elevated text-primary border-l-2 border-primary shadow-[0_0_10px_rgba(0,255,157,0.3)]'
+                    ? 'bg-surface-elevated text-primary border-l-2 border-primary shadow-[0_0_10px_rgba(255,255,13,0.35)]'
                     : 'bg-surface hover:bg-surface-interactive text-fg hover:text-primary'
                 }`}
               >

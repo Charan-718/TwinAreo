@@ -92,7 +92,7 @@ export const Notice: React.FC<{
 }> = ({ tone = 'info', children, onDismiss }) => {
   const tones = {
     info: 'border-info/50 bg-info-soft text-fg shadow-[0_0_10px_rgba(0,240,255,0.15)]',
-    success: 'border-success/50 bg-success-soft text-fg shadow-[0_0_10px_rgba(0,255,157,0.15)]',
+    success: 'border-success/50 bg-success-soft text-fg shadow-[0_0_10px_rgba(255,255,13,0.2)]',
     warning: 'border-warning/50 bg-warning-soft text-fg shadow-[0_0_10px_rgba(255,184,0,0.15)]',
   };
 

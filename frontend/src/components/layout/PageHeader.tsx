@@ -31,7 +31,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       )}
       <h1
         className="text-page-title font-display font-black tracking-wide text-fg uppercase"
-        style={{ textShadow: '0 0 12px rgba(0, 255, 157, 0.25)' }}
+        style={{ textShadow: '0 0 12px rgba(255, 255, 13, 0.35)' }}
       >
         {title}
       </h1>

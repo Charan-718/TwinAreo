@@ -100,14 +100,14 @@ const NavList: React.FC<{
                     aria-current={active ? 'page' : undefined}
                     className={`flex items-center justify-between h-9 px-3 clip-cut-btn text-xs font-display font-semibold uppercase tracking-wider no-underline transition-all duration-fast ${
                       active
-                        ? 'bg-surface-elevated text-primary border-l-2 border-primary shadow-[0_0_12px_rgba(0,255,157,0.25)]'
+                        ? 'bg-surface-elevated text-primary border-l-2 border-primary shadow-[0_0_12px_rgba(255,255,13,0.35)]'
                         : 'text-fg-secondary hover:bg-surface-interactive/70 hover:text-primary hover:border-l-2 hover:border-primary/40'
                     }`}
                   >
                     <span className="flex items-center gap-2 truncate">
                       <span
                         className={`w-1.5 h-1.5 ${
-                          active ? 'bg-primary shadow-[0_0_6px_#00ff9d]' : 'bg-line-strong'
+                          active ? 'bg-primary shadow-[0_0_6px_#ffff0d]' : 'bg-line-strong'
                         }`}
                         aria-hidden="true"
                       />
@@ -239,7 +239,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           e.preventDefault();
           document.getElementById('main')?.focus();
         }}
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 bg-surface-elevated text-primary font-mono px-3 py-2 clip-cut-btn border border-primary shadow-[0_0_12px_rgba(0,255,157,0.4)]"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 bg-surface-elevated text-primary font-mono px-3 py-2 clip-cut-btn border border-primary shadow-[0_0_12px_rgba(255,255,13,0.4)]"
       >
         [ SKIP_TO_CONTENT ]
       </a>
@@ -353,7 +353,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           />
           <div
             ref={drawerRef}
-            className="absolute inset-y-0 left-0 w-[min(20rem,85vw)] border-r border-primary/40 bg-surface shadow-[0_0_30px_rgba(0,255,157,0.2)] flex flex-col clip-cut-corner"
+            className="absolute inset-y-0 left-0 w-[min(20rem,85vw)] border-r border-primary/40 bg-surface shadow-[0_0_30px_rgba(255,255,13,0.25)] flex flex-col clip-cut-corner"
           >
             <div className="h-header flex items-center justify-between px-4 border-b border-line">
               <span className="font-display font-bold text-fg tracking-wider">[ TWINAERO // MENU ]</span>

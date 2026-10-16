@@ -6,11 +6,11 @@ export type Tone = 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'prim
 
 const tones: Record<Tone, string> = {
   neutral: 'bg-surface-interactive text-fg-secondary border border-line',
-  success: 'bg-success-soft text-success border border-success/40 shadow-[0_0_8px_rgba(0,255,157,0.15)]',
+  success: 'bg-success-soft text-success border border-success/40 shadow-[0_0_8px_rgba(255,255,13,0.2)]',
   warning: 'bg-warning-soft text-warning border border-warning/40 shadow-[0_0_8px_rgba(255,184,0,0.15)]',
   danger: 'bg-danger-soft text-danger border border-danger/40 shadow-[0_0_8px_rgba(255,0,85,0.2)]',
   info: 'bg-info-soft text-info border border-info/40 shadow-[0_0_8px_rgba(0,240,255,0.15)]',
-  primary: 'bg-primary-soft text-primary-text border border-primary/40 shadow-[0_0_8px_rgba(0,255,157,0.15)]',
+  primary: 'bg-primary-soft text-primary-text border border-primary/40 shadow-[0_0_8px_rgba(255,255,13,0.2)]',
 };
 
 const dot: Record<Tone, string> = {
