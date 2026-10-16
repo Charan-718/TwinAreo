@@ -9,8 +9,10 @@ export interface AeroTwinIconProps extends React.SVGProps<SVGSVGElement> {
 
 /**
  * AeroTwin / TwinAero Hybrid Dual-Themed Icon:
- * - Dark Mode: Radiant Solar Gold (#ffb703, #ffd000, #ff7b00) digital twin with stealth carbon titanium airframe.
- * - Light Mode: Sleek Technical Titanium Slate Grey (#334155, #475569, #64748b, #94a3b8) digital twin and airframe.
+ * - Dark Mode: Radiant All-Gold Icon (Lustrous Solid Metallic Gold physical aircraft on the left,
+ *   Holographic Solar Gold wireframe digital twin on the right).
+ * - Light Mode: Sleek Technical Titanium Slate Grey (Solid Dark Titanium on the left,
+ *   Silver Grey Wireframe digital twin on the right).
  * - Automatically responds to `[data-theme="dark"]` vs `[data-theme="light"]` or can be forced via `variant`.
  */
 export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
@@ -75,16 +77,31 @@ export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
           </feMerge>
         </filter>
 
+        {/* Physical Metallic Gold Gradient (Left Aircraft) */}
+        <linearGradient id="at-gold-phys-grad" x1="30" y1="200" x2="400" y2="200" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#b45309" />
+          <stop offset="25%" stopColor="#d97706" />
+          <stop offset="55%" stopColor="#f59e0b" />
+          <stop offset="85%" stopColor="#ffb703" />
+          <stop offset="100%" stopColor="#ffd000" />
+        </linearGradient>
+
+        <linearGradient id="at-gold-phys-specular" x1="120" y1="165" x2="380" y2="230" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#fff1a8" />
+          <stop offset="60%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#b45309" />
+        </linearGradient>
+
+        <linearGradient id="at-gold-frame-left" x1="215" y1="200" x2="400" y2="200" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#b45309" />
+          <stop offset="60%" stopColor="#d97706" />
+          <stop offset="100%" stopColor="#ffb703" />
+        </linearGradient>
+
         <linearGradient id="at-gold-gradient" x1="400" y1="50" x2="780" y2="350" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#ffd000" />
           <stop offset="50%" stopColor="#ffb703" />
           <stop offset="100%" stopColor="#ff7b00" />
-        </linearGradient>
-
-        <linearGradient id="at-carbon-dark-grad" x1="50" y1="200" x2="400" y2="200" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#07080b" />
-          <stop offset="60%" stopColor="#12141c" />
-          <stop offset="100%" stopColor="#1b1e2a" />
         </linearGradient>
 
         <linearGradient id="at-split-gold-grad" x1="400" y1="40" x2="400" y2="365" gradientUnits="userSpaceOnUse">
@@ -136,21 +153,38 @@ export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
       </defs>
 
       {/* ══════════════════════════════════════════════════════════════
-           DARK MODE: GOLD ICON
+           DARK MODE: ALL-GOLD ICON (SOLID GOLD LEFT + WIREFRAME GOLD RIGHT)
            ══════════════════════════════════════════════════════════════ */}
       {showDark && (
         <g className="at-layer-dark">
           <ellipse cx="520" cy="200" rx="220" ry="120" fill="url(#at-gold-radial-bg)" pointerEvents="none" />
 
-          {/* Rhombus Frame */}
+          {/* Left Rhombus Frame: Burnished Gold */}
           <polyline
             points="400,38 215,200 400,362"
             fill="none"
-            stroke="#1b1e2a"
-            strokeWidth="6"
+            stroke="url(#at-gold-frame-left)"
+            strokeWidth="5.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
+          <polyline
+            points="400,38 215,200 400,362"
+            fill="none"
+            stroke="#ffd000"
+            strokeWidth="1.25"
+            strokeOpacity="0.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle cx="345" cy="85" r="3.5" fill="#ffd000" stroke="#b45309" strokeWidth="1.5" />
+          <circle cx="290" cy="133" r="4" fill="#ffb703" stroke="#b45309" strokeWidth="1.5" />
+          <circle cx="240" cy="178" r="3.5" fill="#ffb703" stroke="#b45309" strokeWidth="1.5" />
+          <circle cx="255" cy="235" r="4" fill="#d97706" stroke="#78350f" strokeWidth="1.5" />
+          <circle cx="305" cy="278" r="3.5" fill="#d97706" stroke="#78350f" strokeWidth="1.5" />
+          <circle cx="355" cy="322" r="3" fill="#b45309" stroke="#78350f" strokeWidth="1.5" />
+
+          {/* Right Rhombus Frame: Glowing Gold Conduit */}
           <polyline
             points="400,38 585,200 400,362"
             fill="none"
@@ -202,25 +236,31 @@ export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
             <circle cx="770" cy="200" r="3.5" fill="#ffffff" stroke="#ffd000" strokeWidth="2" />
           </g>
 
-          {/* Left Wing (Carbon Stealth) */}
-          <g fill="url(#at-carbon-dark-grad)">
+          {/* Left Wing (Solid Lustrous Metallic Gold Physical Aircraft) */}
+          <g fill="url(#at-gold-phys-grad)">
             <polygon points="400,68 386,138 400,138" />
             <polygon points="400,165 350,172 30,162 22,175 140,195 220,210 310,225 350,238 400,248" />
-            <polygon points="350,172 170,188 320,208 350,195" fill="#090a0d" />
-            <polygon points="348,172 200,186 315,202 348,192" />
+            <polygon points="350,172 170,188 320,208 350,195" fill="var(--color-bg, #181a20)" />
+            <polygon points="348,172 200,186 315,202 348,192" fill="url(#at-gold-phys-specular)" />
             <polygon points="400,126 338,172 368,228 400,274" />
-            <polygon points="396,140 354,172 376,210 396,210" fill="#090a0d" />
-            <polygon points="362,175 325,225 355,232 388,185" />
-            <rect x="345" y="252" width="6" height="34" rx="2" />
-            <rect x="333" y="278" width="12" height="22" rx="4" />
-            <rect x="353" y="278" width="12" height="22" rx="4" />
-            <rect x="339" y="284" width="20" height="6" rx="2" />
-            <circle cx="248" cy="242" r="27" />
-            <ellipse cx="145" cy="216" rx="13" ry="16" />
-            <ellipse cx="88" cy="195" rx="10" ry="13" />
+            <polygon points="396,140 354,172 376,210 396,210" fill="var(--color-bg, #181a20)" />
+            <polygon points="362,175 325,225 355,232 388,185" fill="#d97706" />
+            <rect x="345" y="252" width="6" height="34" rx="2" fill="#d97706" />
+            <rect x="333" y="278" width="12" height="22" rx="4" fill="#ffd000" stroke="#b45309" strokeWidth="1.2" />
+            <rect x="353" y="278" width="12" height="22" rx="4" fill="#ffd000" stroke="#b45309" strokeWidth="1.2" />
+            <rect x="339" y="284" width="20" height="6" rx="2" fill="#b45309" />
+            <circle cx="339" cy="289" r="2.5" fill="var(--color-bg, #181a20)" />
+            <circle cx="359" cy="289" r="2.5" fill="var(--color-bg, #181a20)" />
+            <circle cx="248" cy="242" r="27" fill="url(#at-gold-phys-grad)" stroke="#ffd000" strokeWidth="2" />
+            <circle cx="248" cy="242" r="23" fill="var(--color-bg, #181a20)" />
+            <circle cx="248" cy="242" r="14" fill="#d97706" />
+            <circle cx="248" cy="242" r="6" fill="#ffd000" />
+            <ellipse cx="145" cy="216" rx="13" ry="16" fill="url(#at-gold-phys-grad)" stroke="#ffd000" strokeWidth="1" />
+            <ellipse cx="88" cy="195" rx="10" ry="13" fill="url(#at-gold-phys-grad)" stroke="#ffd000" strokeWidth="1" />
           </g>
+          <line x1="30" y1="162" x2="400" y2="165" stroke="#fff4a3" strokeWidth="1.5" strokeLinecap="round" />
 
-          {/* Right Digital Twin Wireframe */}
+          {/* Right Digital Twin Wireframe (Gold) */}
           <g stroke="#ffb703" strokeWidth="1.5" fill="none" filter="url(#at-gold-glow)">
             <polygon points="400,68 414,138 400,138" fill="rgba(255, 183, 3, 0.08)" />
             <line x1="400" y1="92" x2="408" y2="138" />
@@ -248,7 +288,7 @@ export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
             <polygon points="452,172 600,186 485,202 452,192" fill="rgba(255, 123, 0, 0.16)" stroke="#ff7b00" strokeWidth="1.5" />
           </g>
 
-          <g stroke="#ffb703" strokeWidth="1.3" fill="none" filter="url(#at-gold-glow)">
+          <g stroke="#ffb703" strokeWidth="1.3" fill="none" filter="url(#gold-glow)">
             <polygon points="400,126 462,172 432,228 400,274" fill="rgba(255, 183, 3, 0.08)" strokeWidth="2" />
             <polygon points="400,126 430,148 400,172" fill="rgba(255, 208, 0, 0.14)" />
             <polygon points="430,148 462,172 422,185" fill="rgba(255, 123, 0, 0.1)" />
@@ -269,7 +309,7 @@ export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
           </g>
 
           {/* Right Gear & Pods */}
-          <g stroke="#ffb703" strokeWidth="1.5" fill="none" filter="url(#at-gold-glow)">
+          <g stroke="#ffb703" strokeWidth="1.5" fill="none" filter="url(#gold-glow)">
             <rect x="449" y="252" width="6" height="34" rx="2" strokeWidth="1.5" />
             <rect x="441" y="278" width="12" height="22" rx="4" strokeWidth="1.5" fill="rgba(255, 183, 3, 0.15)" />
             <rect x="461" y="278" width="12" height="22" rx="4" strokeWidth="1.5" fill="rgba(255, 183, 3, 0.15)" />
@@ -346,7 +386,7 @@ export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
       )}
 
       {/* ══════════════════════════════════════════════════════════════
-           LIGHT MODE: GREY ICON
+           LIGHT MODE: SLEEK TITANIUM SLATE GREY ICON
            ══════════════════════════════════════════════════════════════ */}
       {showLight && (
         <g className="at-layer-light">
@@ -416,10 +456,10 @@ export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
           <g fill="url(#at-titanium-slate-grad)">
             <polygon points="400,68 386,138 400,138" />
             <polygon points="400,165 350,172 30,162 22,175 140,195 220,210 310,225 350,238 400,248" />
-            <polygon points="350,172 170,188 320,208 350,195" fill="#f8fafc" />
+            <polygon points="350,172 170,188 320,208 350,195" fill="var(--color-bg, #f5f4f0)" />
             <polygon points="348,172 200,186 315,202 348,192" />
             <polygon points="400,126 338,172 368,228 400,274" />
-            <polygon points="396,140 354,172 376,210 396,210" fill="#f8fafc" />
+            <polygon points="396,140 354,172 376,210 396,210" fill="var(--color-bg, #f5f4f0)" />
             <polygon points="362,175 325,225 355,232 388,185" />
             <rect x="345" y="252" width="6" height="34" rx="2" />
             <rect x="333" y="278" width="12" height="22" rx="4" />
@@ -448,7 +488,7 @@ export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
             <line x1="450" y1="172" x2="500" y2="223" strokeWidth="1.2" stroke="#64748b" opacity="0.85" />
             <line x1="510" y1="171" x2="450" y2="238" strokeWidth="1.2" stroke="#64748b" opacity="0.85" />
             <line x1="510" y1="171" x2="565" y2="212" strokeWidth="1.2" stroke="#64748b" opacity="0.85" />
-            <line x1="575" y1="169" x2="500" y2="223" strokeWidth="1.2" stroke="#64748b" opacity="0.85" />
+            <line x1="575" y1="169" x2="500" y2="223" strokeWidth="1.2" opacity="0.85" stroke="#64748b" />
             <line x1="575" y1="169" x2="630" y2="201" strokeWidth="1.2" opacity="0.85" stroke="#64748b" />
             <line x1="640" y1="167" x2="565" y2="212" strokeWidth="1.2" opacity="0.85" stroke="#64748b" />
             <line x1="640" y1="167" x2="695" y2="188" strokeWidth="1.2" opacity="0.85" stroke="#64748b" />

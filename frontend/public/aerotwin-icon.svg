@@ -35,16 +35,30 @@
       </feMerge>
     </filter>
 
+    <linearGradient id="gold-phys-grad" x1="30" y1="200" x2="400" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#b45309" />
+      <stop offset="25%" stop-color="#d97706" />
+      <stop offset="55%" stop-color="#f59e0b" />
+      <stop offset="85%" stop-color="#ffb703" />
+      <stop offset="100%" stop-color="#ffd000" />
+    </linearGradient>
+
+    <linearGradient id="gold-phys-specular" x1="120" y1="165" x2="380" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff1a8" />
+      <stop offset="60%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+
+    <linearGradient id="gold-frame-left" x1="215" y1="200" x2="400" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#b45309" />
+      <stop offset="60%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#ffb703" />
+    </linearGradient>
+
     <linearGradient id="gold-gradient" x1="400" y1="50" x2="780" y2="350" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#ffd000" />
       <stop offset="50%" stop-color="#ffb703" />
       <stop offset="100%" stop-color="#ff7b00" />
-    </linearGradient>
-
-    <linearGradient id="carbon-dark-grad" x1="50" y1="200" x2="400" y2="200" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#07080b" />
-      <stop offset="60%" stop-color="#12141c" />
-      <stop offset="100%" stop-color="#1b1e2a" />
     </linearGradient>
 
     <linearGradient id="split-gold-grad" x1="400" y1="40" x2="400" y2="365" gradientUnits="userSpaceOnUse">
@@ -96,14 +110,22 @@
   </defs>
 
   <!-- ══════════════════════════════════════════════════════════════
-       DARK MODE: RADIANT SOLAR GOLD
+       DARK MODE: ALL-GOLD AIRCRAFT (SOLID GOLD LEFT + WIREFRAME GOLD RIGHT)
        ══════════════════════════════════════════════════════════════ -->
   <g class="aerotwin-layer-dark">
     <!-- Ambient Gold Glow -->
     <ellipse cx="520" cy="200" rx="220" ry="120" fill="url(#gold-radial-bg)" pointer-events="none" />
 
     <!-- Rhombus Frame -->
-    <polyline points="400,38 215,200 400,362" fill="none" stroke="#1b1e2a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <polyline points="400,38 215,200 400,362" fill="none" stroke="url(#gold-frame-left)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+    <polyline points="400,38 215,200 400,362" fill="none" stroke="#ffd000" stroke-width="1.25" stroke-opacity="0.75" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="345" cy="85" r="3.5" fill="#ffd000" stroke="#b45309" stroke-width="1.5" />
+    <circle cx="290" cy="133" r="4" fill="#ffb703" stroke="#b45309" stroke-width="1.5" />
+    <circle cx="240" cy="178" r="3.5" fill="#ffb703" stroke="#b45309" stroke-width="1.5" />
+    <circle cx="255" cy="235" r="4" fill="#d97706" stroke="#78350f" stroke-width="1.5" />
+    <circle cx="305" cy="278" r="3.5" fill="#d97706" stroke="#78350f" stroke-width="1.5" />
+    <circle cx="355" cy="322" r="3" fill="#b45309" stroke="#78350f" stroke-width="1.5" />
+
     <polyline points="400,38 585,200 400,362" fill="none" stroke="url(#gold-gradient)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#gold-glow)" />
     <polyline points="400,38 585,200 400,362" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.85" />
 
@@ -140,23 +162,29 @@
       <circle cx="770" cy="200" r="3.5" fill="#ffffff" stroke="#ffd000" stroke-width="2" />
     </g>
 
-    <!-- Physical Aircraft (Left) -->
-    <g fill="url(#carbon-dark-grad)">
+    <!-- Physical Aircraft (Left - Solid Lustrous Metallic Gold) -->
+    <g fill="url(#gold-phys-grad)">
       <polygon points="400,68 386,138 400,138" />
       <polygon points="400,165 350,172 30,162 22,175 140,195 220,210 310,225 350,238 400,248" />
-      <polygon points="350,172 170,188 320,208 350,195" fill="#090a0d" />
-      <polygon points="348,172 200,186 315,202 348,192" />
+      <polygon points="350,172 170,188 320,208 350,195" fill="#181a20" />
+      <polygon points="348,172 200,186 315,202 348,192" fill="url(#gold-phys-specular)" />
       <polygon points="400,126 338,172 368,228 400,274" />
-      <polygon points="396,140 354,172 376,210 396,210" fill="#090a0d" />
-      <polygon points="362,175 325,225 355,232 388,185" />
-      <rect x="345" y="252" width="6" height="34" rx="2" />
-      <rect x="333" y="278" width="12" height="22" rx="4" />
-      <rect x="353" y="278" width="12" height="22" rx="4" />
-      <rect x="339" y="284" width="20" height="6" rx="2" />
-      <circle cx="248" cy="242" r="27" />
-      <ellipse cx="145" cy="216" rx="13" ry="16" />
-      <ellipse cx="88" cy="195" rx="10" ry="13" />
+      <polygon points="396,140 354,172 376,210 396,210" fill="#181a20" />
+      <polygon points="362,175 325,225 355,232 388,185" fill="#d97706" />
+      <rect x="345" y="252" width="6" height="34" rx="2" fill="#d97706" />
+      <rect x="333" y="278" width="12" height="22" rx="4" fill="#ffd000" stroke="#b45309" stroke-width="1.2" />
+      <rect x="353" y="278" width="12" height="22" rx="4" fill="#ffd000" stroke="#b45309" stroke-width="1.2" />
+      <rect x="339" y="284" width="20" height="6" rx="2" fill="#b45309" />
+      <circle cx="339" cy="289" r="2.5" fill="#181a20" />
+      <circle cx="359" cy="289" r="2.5" fill="#181a20" />
+      <circle cx="248" cy="242" r="27" fill="url(#gold-phys-grad)" stroke="#ffd000" stroke-width="2" />
+      <circle cx="248" cy="242" r="23" fill="#181a20" />
+      <circle cx="248" cy="242" r="14" fill="#d97706" />
+      <circle cx="248" cy="242" r="6" fill="#ffd000" />
+      <ellipse cx="145" cy="216" rx="13" ry="16" fill="url(#gold-phys-grad)" stroke="#ffd000" stroke-width="1" />
+      <ellipse cx="88" cy="195" rx="10" ry="13" fill="url(#gold-phys-grad)" stroke="#ffd000" stroke-width="1" />
     </g>
+    <line x1="30" y1="162" x2="400" y2="165" stroke="#fff4a3" stroke-width="1.5" stroke-linecap="round" />
 
     <!-- Digital Twin Wireframe (Right) -->
     <g stroke="#ffb703" stroke-width="1.5" fill="none" filter="url(#gold-glow)">
@@ -363,13 +391,13 @@
       <line x1="450" y1="172" x2="500" y2="223" stroke-width="1.2" stroke="#64748b" opacity="0.85" />
       <line x1="510" y1="171" x2="450" y2="238" stroke-width="1.2" stroke="#64748b" opacity="0.85" />
       <line x1="510" y1="171" x2="565" y2="212" stroke-width="1.2" stroke="#64748b" opacity="0.85" />
-      <line x1="575" y1="169" x2="500" y2="223" stroke-width="1.2" stroke="#64748b" opacity="0.85" />
-      <line x1="575" y1="169" x2="630" y2="201" stroke-width="1.2" stroke="#64748b" opacity="0.85" />
-      <line x1="640" y1="167" x2="565" y2="212" stroke-width="1.2" stroke="#64748b" opacity="0.85" />
-      <line x1="640" y1="167" x2="695" y2="188" stroke-width="1.2" stroke="#64748b" opacity="0.85" />
-      <line x1="705" y1="165" x2="630" y2="201" stroke-width="1.2" opacity="0.85" />
-      <line x1="705" y1="165" x2="778" y2="175" stroke-width="1.2" opacity="0.85" />
-      <line x1="770" y1="162" x2="695" y2="188" stroke-width="1.2" opacity="0.85" />
+      <line x1="575" y1="169" x2="500" y2="223" stroke-width="1.2" opacity="0.85" stroke="#64748b" />
+      <line x1="575" y1="169" x2="630" y2="201" stroke-width="1.2" opacity="0.85" stroke="#64748b" />
+      <line x1="640" y1="167" x2="565" y2="212" stroke-width="1.2" opacity="0.85" stroke="#64748b" />
+      <line x1="640" y1="167" x2="695" y2="188" stroke-width="1.2" opacity="0.85" stroke="#64748b" />
+      <line x1="705" y1="165" x2="630" y2="201" stroke-width="1.2" opacity="0.85" stroke="#64748b" />
+      <line x1="705" y1="165" x2="778" y2="175" stroke-width="1.2" opacity="0.85" stroke="#64748b" />
+      <line x1="770" y1="162" x2="695" y2="188" stroke-width="1.2" opacity="0.85" stroke="#64748b" />
       <polygon points="452,172 600,186 485,202 452,192" fill="rgba(71, 85, 105, 0.15)" stroke="#64748b" stroke-width="1.5" />
     </g>
 

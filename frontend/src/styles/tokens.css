@@ -9,25 +9,26 @@
  * - Circuit lines, tech bracket badges, and high-density telemetry readouts
  */
 
-:root {
+:root,
+:root[data-theme='dark'] {
   color-scheme: dark;
 
-  /* ── 60% Dominant Canvas (Carbon Stealth & Obsidian Titanium) ── */
-  --color-bg: #090a0d;
-  --color-surface: #0f1117;
-  --color-surface-elevated: #161822;
-  --color-surface-interactive: #1f2230;
-  --color-surface-sunken: #050608;
+  /* ── 60% Dominant Canvas (Aerospace Titanium Graphite Grey) ── */
+  --color-bg: #181a20;
+  --color-surface: #21252e;
+  --color-surface-elevated: #2a2f3b;
+  --color-surface-interactive: #353b4a;
+  --color-surface-sunken: #121418;
 
   /* ── Text Hierarchy (Carbon Titanium & Warm Silver) ── */
   --color-text-primary: #fcfbfa;
-  --color-text-secondary: #a3a7b5;
-  --color-text-muted: #5e6272;
-  --color-text-inverse: #090a0d;
+  --color-text-secondary: #abb1bf;
+  --color-text-muted: #6e7587;
+  --color-text-inverse: #181a20;
 
   /* ── 30% Structural Cyber Borders ── */
-  --color-border: #232634;
-  --color-border-subtle: #161822;
+  --color-border: #333947;
+  --color-border-subtle: #242833;
   --color-border-strong: #ffb703;
 
   /* ── 10% Actions & Solar Amber/Gold Accents (From 3D Model VTOL Rings & Edge Piping) ── */
