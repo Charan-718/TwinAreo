@@ -274,7 +274,7 @@ export const AppShell: React.FC<AppShellProps> = ({
               </div>
 
               {/* AeroTwin Hybrid Physical & Digital Twin Icon */}
-              <AeroTwinIcon className="h-7 w-14 shrink-0 drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]" aria-hidden="true" />
+              <AeroTwinIcon className="h-7 w-14 shrink-0 drop-shadow-[0_0_8px_rgba(255,183,3,0.35)]" aria-hidden="true" />
 
               {/* Geometric Cut Hacker Typography */}
               <div className="flex flex-col">
@@ -283,7 +283,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                 </span>
                 <div className="flex items-center tracking-[0.12em] font-display font-black text-lg text-fg leading-none">
                   <span className="text-fg">TWIN</span>
-                  <span className="text-primary relative" style={{ textShadow: '0 0 8px rgba(0,255,157,0.4)' }}>
+                  <span className="text-primary relative" style={{ textShadow: '0 0 8px rgba(255,183,3,0.45)' }}>
                     AER
                     <span className="text-danger inline-block relative">
                       O
