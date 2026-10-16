@@ -9,23 +9,58 @@ interface StatProps {
   className?: string;
 }
 
-/** Label / value / hint. Used inside stat strips rather than as standalone cards. */
-export const Stat: React.FC<StatProps> = ({ label, value, unit, hint, size = 'md', className = '' }) => (
-  <div className={`min-w-0 ${className}`}>
-    <dt className="label">{label}</dt>
-    <dd className="mt-1.5 flex items-baseline gap-1.5 m-0">
-      <span className={`${size === 'lg' ? 'text-metric' : 'text-xl'} font-medium tracking-tight text-fg tabular`}>{value}</span>
-      {unit && <span className="text-sm text-fg-muted">{unit}</span>}
-    </dd>
-    {hint && <dd className="mt-1 text-xs text-fg-muted m-0">{hint}</dd>}
+/**
+ * Hollywood Hacker Metric readout with phosphor value, monospace label, and bracketed hints.
+ */
+export const Stat: React.FC<StatProps> = ({
+  label,
+  value,
+  unit,
+  hint,
+  size = 'md',
+  className = '',
+}) => (
+  <div className={`min-w-0 flex flex-col justify-between h-full ${className}`}>
+    <div>
+      <dt className="label flex items-center gap-1.5 text-primary/80">
+        <span className="inline-block w-1 h-1 bg-primary" aria-hidden="true" />
+        <span>{label}</span>
+      </dt>
+      <dd className="mt-2 flex items-baseline gap-1.5 m-0">
+        <span
+          className={`${
+            size === 'lg' ? 'text-metric' : 'text-xl'
+          } font-bold tracking-tight text-fg font-mono tabular`}
+          style={{ textShadow: '0 0 10px rgba(0, 255, 157, 0.3)' }}
+        >
+          {value}
+        </span>
+        {unit && <span className="text-xs font-mono font-medium text-primary/70">{unit}</span>}
+      </dd>
+    </div>
+    {hint && (
+      <dd className="mt-2 text-xs text-fg-muted m-0 font-mono leading-normal flex items-start gap-1">
+        <span className="text-primary/50 shrink-0">&gt;</span>
+        <span>{hint}</span>
+      </dd>
+    )}
   </div>
 );
 
-/** A row of stats separated by hairlines; wraps to a 2-column grid on small screens. */
-export const StatStrip: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
-  <dl className={`grid grid-cols-2 lg:grid-flow-col lg:auto-cols-fr gap-px [&>div:last-child:nth-child(odd)]:col-span-2 lg:[&>div:last-child:nth-child(odd)]:col-span-1 bg-line border border-line rounded-lg overflow-hidden m-0 ${className}`}>
-    {React.Children.map(children, (child) =>
-      child ? <div className="bg-surface p-4 md:p-5">{child}</div> : null,
-    )}
-  </dl>
+/**
+ * Cut-corner metric strip container with clean grid separation.
+ */
+export const StatStrip: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className = '',
+}) => (
+  <div className={`cyber-cut-frame mb-6 ${className}`}>
+    <dl
+      className="cyber-cut-inner grid grid-cols-2 lg:grid-flow-col lg:auto-cols-fr gap-px bg-line m-0"
+    >
+      {React.Children.map(children, (child) =>
+        child ? <div className="p-4 md:p-5 bg-surface relative">{child}</div> : null,
+      )}
+    </dl>
+  </div>
 );

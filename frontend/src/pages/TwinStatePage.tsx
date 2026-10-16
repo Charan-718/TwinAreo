@@ -52,14 +52,18 @@ export const TwinStatePage: React.FC<{ engine: EngineDetail }> = ({ engine }) =>
                 type="button"
                 aria-pressed={active}
                 onClick={() => setSelected(st.id)}
-                className={`text-left p-3 md:p-4 transition-colors duration-fast ${
-                  active ? 'bg-primary-soft' : 'bg-surface hover:bg-surface-interactive'
+                className={`text-left p-3 md:p-4 clip-cut-btn transition-all duration-fast ${
+                  active
+                    ? 'bg-surface-elevated text-primary border-l-2 border-primary shadow-[0_0_10px_rgba(0,255,157,0.3)]'
+                    : 'bg-surface hover:bg-surface-interactive text-fg hover:text-primary'
                 }`}
               >
-                <span className={`block text-sm font-semibold ${active ? 'text-primary-text' : 'text-fg'}`}>{st.short}</span>
-                <span className="block text-xs text-fg-muted mt-0.5 truncate">{st.name}</span>
+                <span className={`block text-xs md:text-sm font-display font-bold uppercase tracking-wider ${active ? 'text-primary' : 'text-fg'}`}>
+                  {"// "}{st.short}
+                </span>
+                <span className="block text-[11px] font-mono text-fg-muted mt-0.5 truncate">{st.name}</span>
                 <span className="flex items-center justify-between gap-2 mt-3">
-                  <span className="font-mono text-sm tabular">{fmt.signed(sigma, 1)}σ</span>
+                  <span className="font-mono text-xs tabular font-bold">{fmt.signed(sigma, 1)}σ</span>
                   <Tag tone={state.tone}>{state.label}</Tag>
                 </span>
               </button>

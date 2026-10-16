@@ -40,9 +40,19 @@ interface LineChartProps {
 }
 
 export const LineChart: React.FC<LineChartProps> = ({
-  x, series, band, refLines = [], height = 260, yDomain, xLabel, yLabel,
-  formatX = (v) => String(Math.round(v)), formatY = (v) => String(Math.round(v * 100) / 100),
-  ariaLabel, showLegend, compact = false,
+  x,
+  series,
+  band,
+  refLines = [],
+  height = 260,
+  yDomain,
+  xLabel,
+  yLabel,
+  formatX = (v) => String(Math.round(v)),
+  formatY = (v) => String(Math.round(v * 100) / 100),
+  ariaLabel,
+  showLegend,
+  compact = false,
 }) => {
   const { ref, width } = useWidth<HTMLDivElement>();
   const [hover, setHover] = useState<number | null>(null);
@@ -76,7 +86,10 @@ export const LineChart: React.FC<LineChartProps> = ({
     let d = '';
     let pen = false;
     vals.forEach((v, i) => {
-      if (v == null) { if (!connect) pen = false; return; }
+      if (v == null) {
+        if (!connect) pen = false;
+        return;
+      }
       d += `${pen ? 'L' : 'M'}${sx(x[i]).toFixed(1)},${sy(v).toFixed(1)}`;
       pen = true;
     });
@@ -93,7 +106,10 @@ export const LineChart: React.FC<LineChartProps> = ({
     let bestD = Infinity;
     x.forEach((xi, i) => {
       const d = Math.abs(sx(xi) - px);
-      if (d < bestD) { bestD = d; best = i; }
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
     });
     return best;
   };
@@ -118,27 +134,47 @@ export const LineChart: React.FC<LineChartProps> = ({
   return (
     <figure className="m-0">
       {legend && (
-        <ul className="flex flex-wrap gap-x-4 gap-y-1 mb-3 text-xs text-fg-secondary list-none p-0 m-0">
+        <ul className="flex flex-wrap gap-x-5 gap-y-1.5 mb-3 text-xs text-fg-secondary list-none p-0 m-0">
           {series.map((s) => (
             <li key={s.id} className="flex items-center gap-1.5">
               <svg width="16" height="8" aria-hidden="true">
-                <line x1="0" x2="16" y1="4" y2="4" stroke={s.color} strokeWidth="2" strokeDasharray={s.dashed ? '4 3' : undefined} />
+                <line
+                  x1="0"
+                  x2="16"
+                  y1="4"
+                  y2="4"
+                  stroke={s.color}
+                  strokeWidth="2"
+                  strokeDasharray={s.dashed ? '4 3' : undefined}
+                />
               </svg>
-              {s.label}
+              <span>{s.label}</span>
             </li>
           ))}
           {band && (
             <li className="flex items-center gap-1.5">
-              <span className="w-4 h-2.5 rounded-sm" style={{ background: band.color, opacity: 0.3 }} aria-hidden="true" />
-              {band.label}
+              <span
+                className="w-3.5 h-2 rounded-sm"
+                style={{ background: band.color, opacity: 0.3 }}
+                aria-hidden="true"
+              />
+              <span>{band.label}</span>
             </li>
           )}
           {refLines.map((r) => (
             <li key={r.label} className="flex items-center gap-1.5">
               <svg width="16" height="8" aria-hidden="true">
-                <line x1="0" x2="16" y1="4" y2="4" stroke="var(--color-text-muted)" strokeWidth="1" strokeDasharray="3 3" />
+                <line
+                  x1="0"
+                  x2="16"
+                  y1="4"
+                  y2="4"
+                  stroke="var(--color-text-muted)"
+                  strokeWidth="1.5"
+                  strokeDasharray="3 3"
+                />
               </svg>
-              {r.label}
+              <span>{r.label}</span>
             </li>
           ))}
         </ul>
@@ -152,83 +188,199 @@ export const LineChart: React.FC<LineChartProps> = ({
           tabIndex={0}
           onKeyDown={onKey}
           onBlur={() => setHover(null)}
-          className="block overflow-visible rounded-sm"
+          className="block overflow-visible"
         >
+          {/* Horizontal Grid lines */}
           {yTicks.map((t) => (
             <g key={`y${t}`}>
-              <line x1={pad.left} x2={pad.left + innerW} y1={sy(t)} y2={sy(t)} stroke="var(--chart-grid)" strokeWidth="1" />
-              <text x={pad.left - 8} y={sy(t)} dy="0.32em" textAnchor="end" className="fill-fg-muted tabular" fontSize="11">
+              <line
+                x1={pad.left}
+                x2={pad.left + innerW}
+                y1={sy(t)}
+                y2={sy(t)}
+                stroke="var(--chart-grid)"
+                strokeWidth="1"
+              />
+              <text
+                x={pad.left - 8}
+                y={sy(t)}
+                dy="0.32em"
+                textAnchor="end"
+                fill="var(--color-text-muted)"
+                className="tabular text-[11px]"
+              >
                 {formatY(t)}
               </text>
             </g>
           ))}
-          <line x1={pad.left} x2={pad.left + innerW} y1={pad.top + innerH} y2={pad.top + innerH} stroke="var(--chart-axis)" />
+          <line
+            x1={pad.left}
+            x2={pad.left + innerW}
+            y1={pad.top + innerH}
+            y2={pad.top + innerH}
+            stroke="var(--chart-axis)"
+            strokeWidth="1"
+          />
           {xTicks.map((t) => (
-            <text key={`x${t}`} x={sx(t)} y={pad.top + innerH + 16} textAnchor="middle" className="fill-fg-muted tabular" fontSize="11">
+            <text
+              key={`x${t}`}
+              x={sx(t)}
+              y={pad.top + innerH + 16}
+              textAnchor="middle"
+              fill="var(--color-text-muted)"
+              className="tabular text-[11px]"
+            >
               {formatX(t)}
             </text>
           ))}
           {xLabel && (
-            <text x={pad.left + innerW / 2} y={height - 4} textAnchor="middle" className="fill-fg-muted" fontSize="11">{xLabel}</text>
+            <text
+              x={pad.left + innerW / 2}
+              y={height - 4}
+              textAnchor="middle"
+              fill="var(--color-text-muted)"
+              className="text-[11px] font-medium"
+            >
+              {xLabel}
+            </text>
           )}
           {yLabel && (
-            <text transform={`translate(12 ${pad.top + innerH / 2}) rotate(-90)`} textAnchor="middle" className="fill-fg-muted" fontSize="11">
+            <text
+              transform={`translate(12 ${pad.top + innerH / 2}) rotate(-90)`}
+              textAnchor="middle"
+              fill="var(--color-text-muted)"
+              className="text-[11px] font-medium"
+            >
               {yLabel}
             </text>
           )}
 
-          {band && <path d={bandPath} fill={band.color} style={{ fillOpacity: "var(--chart-band-opacity)" as unknown as number }} stroke="none" />}
+          {band && (
+            <path
+              d={bandPath}
+              fill={band.color}
+              style={{ fillOpacity: "var(--chart-band-opacity)" as unknown as number }}
+              stroke="none"
+            />
+          )}
 
           {refLines.map((r) => (
-            <line key={r.label} x1={pad.left} x2={pad.left + innerW} y1={sy(r.y)} y2={sy(r.y)}
-              stroke="var(--color-text-muted)" strokeWidth="1" strokeDasharray="3 3" />
+            <line
+              key={r.label}
+              x1={pad.left}
+              x2={pad.left + innerW}
+              y1={sy(r.y)}
+              y2={sy(r.y)}
+              stroke="var(--color-text-muted)"
+              strokeWidth="1"
+              strokeDasharray="4 4"
+            />
           ))}
 
+          {/* Precision Series lines */}
           {series.map((s) => (
             <g key={s.id}>
-              <path d={path(s.values, s.connectNulls)} fill="none" stroke={s.color} strokeWidth="2"
-                strokeLinejoin="round" strokeLinecap="round" strokeDasharray={s.dashed ? '5 4' : undefined} />
-              {s.markers && s.values.map((v, i) => v != null && (
-                <circle key={i} cx={sx(x[i])} cy={sy(v)} r="4" fill={s.color} stroke="var(--color-surface)" strokeWidth="2" />
-              ))}
+              <path
+                d={path(s.values, s.connectNulls)}
+                fill="none"
+                stroke={s.color}
+                strokeWidth="2"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                strokeDasharray={s.dashed ? '5 4' : undefined}
+              />
+              {s.markers &&
+                s.values.map(
+                  (v, i) =>
+                    v != null && (
+                      <circle
+                        key={i}
+                        cx={sx(x[i])}
+                        cy={sy(v)}
+                        r="3.5"
+                        fill={s.color}
+                        stroke="var(--color-surface)"
+                        strokeWidth="1.5"
+                      />
+                    ),
+                )}
             </g>
           ))}
 
           {hover != null && (
             <g pointerEvents="none">
-              <line x1={sx(x[hover])} x2={sx(x[hover])} y1={pad.top} y2={pad.top + innerH} stroke="var(--color-border-strong)" />
-              {series.map((s) => s.values[hover] != null && (
-                <circle key={s.id} cx={sx(x[hover])} cy={sy(s.values[hover] as number)} r="4"
-                  fill={s.color} stroke="var(--color-surface)" strokeWidth="2" />
-              ))}
+              <line
+                x1={sx(x[hover])}
+                x2={sx(x[hover])}
+                y1={pad.top}
+                y2={pad.top + innerH}
+                stroke="var(--color-text-muted)"
+                strokeOpacity="0.6"
+                strokeDasharray="3 3"
+              />
+              {series.map(
+                (s) =>
+                  s.values[hover] != null && (
+                    <circle
+                      key={s.id}
+                      cx={sx(x[hover])}
+                      cy={sy(s.values[hover] as number)}
+                      r="4"
+                      fill={s.color}
+                      stroke="var(--color-surface)"
+                      strokeWidth="2"
+                    />
+                  ),
+              )}
             </g>
           )}
 
-          <rect x={pad.left} y={pad.top} width={innerW} height={innerH} fill="transparent"
-            onPointerMove={onMove} onPointerLeave={() => setHover(null)} style={{ cursor: 'crosshair', touchAction: 'pan-y' }} />
+          <rect
+            x={pad.left}
+            y={pad.top}
+            width={innerW}
+            height={innerH}
+            fill="transparent"
+            onPointerMove={onMove}
+            onPointerLeave={() => setHover(null)}
+            style={{ cursor: 'crosshair', touchAction: 'pan-y' }}
+          />
         </svg>
 
         {hover != null && (
           <div
-            className="absolute top-1 z-10 pointer-events-none bg-surface-elevated border border-line rounded-md shadow-md px-3 py-2 text-xs min-w-[9rem]"
+            className="absolute top-1 z-10 pointer-events-none border border-primary/50 bg-surface-elevated text-fg clip-cut-btn p-2.5 text-xs shadow-[0_0_15px_rgba(0,255,157,0.3)] min-w-[10rem] font-mono"
             style={tipOnRight ? { left: tipLeft + 12 } : { right: width - tipLeft + 12 }}
           >
-            <div className="font-medium text-fg mb-1 tabular">{xLabel ? `${xLabel} ` : ''}{formatX(x[hover])}</div>
-            {series.map((s) => s.values[hover] != null && (
-              <div key={s.id} className="flex items-center justify-between gap-3 text-fg-secondary">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full" style={{ background: s.color }} aria-hidden="true" />
-                  {s.label}
-                </span>
-                <span className="text-fg tabular">{formatY(s.values[hover] as number)}</span>
-              </div>
-            ))}
-            {band && (
-              <div className="flex items-center justify-between gap-3 text-fg-secondary">
-                <span>{band.label}</span>
-                <span className="text-fg tabular">{formatY(band.lower[hover])}–{formatY(band.upper[hover])}</span>
-              </div>
-            )}
+            <div className="font-bold text-primary mb-1.5 tabular border-b border-line pb-1">
+              <span className="text-primary/70 mr-1">{"//"}</span>{xLabel ? `${xLabel} ` : ''}{formatX(x[hover])}
+            </div>
+            <div className="space-y-1">
+              {series.map(
+                (s) =>
+                  s.values[hover] != null && (
+                    <div key={s.id} className="flex items-center justify-between gap-3 text-fg-secondary">
+                      <span className="flex items-center gap-1.5">
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ background: s.color }}
+                          aria-hidden="true"
+                        />
+                        {s.label}
+                      </span>
+                      <span className="text-fg font-medium tabular">{formatY(s.values[hover] as number)}</span>
+                    </div>
+                  ),
+              )}
+              {band && (
+                <div className="flex items-center justify-between gap-3 text-fg-secondary">
+                  <span>{band.label}</span>
+                  <span className="text-fg font-medium tabular">
+                    {formatY(band.lower[hover])}–{formatY(band.upper[hover])}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

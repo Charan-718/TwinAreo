@@ -18,6 +18,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   } catch {
     throw new ApiError('Cannot reach the TwinAero API. Check that the backend is running on port 8000.');
   }
+  const contentType = res.headers?.get?.('content-type') || '';
+  if (contentType.includes('text/html')) {
+    throw new ApiError('Cannot reach the TwinAero API. Check that the backend is running on port 8000.');
+  }
   if (!res.ok) {
     let detail = `Request failed (HTTP ${res.status}).`;
     try {

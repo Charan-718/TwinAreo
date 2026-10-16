@@ -1,103 +1,117 @@
 /*
- * TwinAero design tokens
+ * TwinAero Cyber Deck Design System Tokens
  *
- * Components consume semantic names only (--color-surface, --color-text-muted ...).
- * Palette intent: a warm instrument-panel neutral as the 60% foundation, layered
- * surfaces and hairline borders as the 30%, and a single petrol primary as the 10%
- * accent for actions, selection and focus. Status hues are reserved for state and
- * always ship with a text label.
- *
- * Type scale: steps of sqrt(phi) ~ 1.272, so every second step is the golden ratio
- * (16 -> 25.9 -> 41.9). Two pragmatic steps below the base (14, 12.6) serve dense
- * tables and labels; nothing renders smaller than 12px.
+ * Hollywood Hacker / Cyberpunk Aerospace Digital Twin UI
+ * Features:
+ * - Angular geometric typography (Chakra Petch & Orbitron & Share Tech Mono)
+ * - Cut-edge polygon clip-path card and panel geometry
+ * - Cyber emerald phosphor (#00ff9d) + cyberspace cyan (#00f0ff) + laser crimson (#ff0055)
+ * - Circuit lines, tech bracket badges, and high-density telemetry readouts
  */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  /* Foundation */
-  --color-bg: #f3f2ee;
-  --color-surface: #fbfaf8;
-  --color-surface-elevated: #fefdfb;
-  --color-surface-interactive: #eceae5;
-  --color-surface-sunken: #efede8;
+  /* ── 60% Dominant Canvas (Cyber Obsidian Void) ── */
+  --color-bg: #04080c;
+  --color-surface: #071219;
+  --color-surface-elevated: #0c1a24;
+  --color-surface-interactive: #122533;
+  --color-surface-sunken: #020508;
 
-  /* Text */
-  --color-text-primary: #1c1f23;
-  --color-text-secondary: #4a4f57;
-  --color-text-muted: #656a73;
-  --color-text-inverse: #fbfaf8;
+  /* ── Text Hierarchy (Phosphor Terminal) ── */
+  --color-text-primary: #e6fff6;
+  --color-text-secondary: #74a89f;
+  --color-text-muted: #3a6860;
+  --color-text-inverse: #020508;
 
-  /* Borders */
-  --color-border: #dcd9d2;
-  --color-border-subtle: #e7e4de;
-  --color-border-strong: #b5b1a8;
+  /* ── 30% Structural Cyber Borders ── */
+  --color-border: #0e332c;
+  --color-border-subtle: #08211c;
+  --color-border-strong: #00ff9d;
 
-  /* Brand */
-  --color-primary: #1f5c66;
-  --color-primary-hover: #184b54;
-  --color-primary-active: #123b42;
-  --color-primary-soft: #dde9ea;
-  --color-primary-text: #1a525b;
-  --color-on-primary: #fbfaf8;
+  /* ── 10% Cyber Actions & Phosphor Accents ── */
+  --color-primary: #00ff9d;
+  --color-primary-hover: #38ffb2;
+  --color-primary-active: #00cc7d;
+  --color-primary-soft: rgba(0, 255, 157, 0.12);
+  --color-primary-text: #00ff9d;
+  --color-on-primary: #010a06;
 
-  /* Accent (used sparingly: the one highlighted series or comparison) */
-  --color-accent: #9c4f22;
-  --color-accent-hover: #843f16;
-  --color-accent-soft: #f3e4d9;
+  /* Accent: Cyberspace Cyan & Laser Red (From Reference Image 1) */
+  --color-accent: #00f0ff;
+  --color-accent-hover: #3be4ff;
+  --color-accent-soft: rgba(0, 240, 255, 0.12);
 
-  /* Semantic */
-  --color-success: #2b7149;
-  --color-success-soft: #e1efe6;
-  --color-warning: #8a5800;
-  --color-warning-soft: #f5ebd5;
-  --color-error: #a8332a;
-  --color-error-soft: #f6e1de;
-  --color-info: #355b8a;
-  --color-info-soft: #e2e9f2;
+  /* Semantic Status */
+  --color-success: #00ff9d;
+  --color-success-soft: rgba(0, 255, 157, 0.12);
+  --color-warning: #ffb800;
+  --color-warning-soft: rgba(255, 184, 0, 0.12);
+  --color-error: #ff0055;
+  --color-error-soft: rgba(255, 0, 85, 0.15);
+  --color-info: #00f0ff;
+  --color-info-soft: rgba(0, 240, 255, 0.12);
 
-  /* Focus */
-  --color-focus: #1f5c66;
+  /* Focus Indicator */
+  --color-focus: #00ff9d;
 
-  /* Charts (validated categorical slots 1-3, dataviz reference palette) */
-  --chart-1: #2a78d6;
-  --chart-2: #eb6834;
-  --chart-3: #1baf7a;
-  --chart-grid: #e6e3dc;
-  --chart-axis: #c3c0b7;
-  --chart-band-opacity: 0.16;
+  /* ── Charts: Neon Phosphor Data Series ── */
+  --chart-1: #00ff9d;
+  --chart-2: #ffb800;
+  --chart-3: #00f0ff;
+  --chart-grid: rgba(0, 255, 157, 0.08);
+  --chart-axis: rgba(0, 255, 157, 0.25);
+  --chart-band-opacity: 0.15;
 
-  /* Typography */
-  --font-family-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-family-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* ── Cut-Edge Clip-Path Geometry ── */
+  --clip-cut-corner: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  --clip-cut-all: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+  --clip-cut-btn: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  --clip-badge: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+  --clip-tag: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  --clip-stat: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
 
-  --font-size-xs: 0.786rem;   /* 12.6px  base / sqrt(phi) */
-  --font-size-sm: 0.875rem;   /* 14px    dense UI text    */
-  --font-size-base: 1rem;     /* 16px                     */
-  --font-size-lg: 1.272rem;   /* 20.4px  base * sqrt(phi) */
-  --font-size-xl: 1.618rem;   /* 25.9px  base * phi       */
-  --font-size-2xl: 2.058rem;  /* 32.9px                   */
-  --font-size-3xl: 2.618rem;  /* 41.9px  base * phi^2     */
-  --font-size-display: clamp(2.058rem, 1.6rem + 2vw, 3.33rem);
-  --font-size-page-title: clamp(1.4rem, 1.2rem + 0.9vw, 2.058rem);
-  --font-size-metric: clamp(2.058rem, 1.7rem + 1.4vw, 2.618rem);
+  /* ── Glow & Illumination Effects ── */
+  --glow-primary: 0 0 12px rgba(0, 255, 157, 0.4), 0 0 24px rgba(0, 255, 157, 0.15);
+  --glow-cyan: 0 0 12px rgba(0, 240, 255, 0.4);
+  --glow-crimson: 0 0 12px rgba(255, 0, 85, 0.4);
+  --glow-border: 0 0 8px rgba(0, 255, 157, 0.25);
+
+  /* ── Typography Scale (Hacker / Cyber Deck) ── */
+  --font-family-display: 'Chakra Petch', 'Orbitron', system-ui, sans-serif;
+  --font-family-sans: 'Chakra Petch', 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-family-mono: 'Share Tech Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.85rem;
+  --font-size-base: 0.95rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.35rem;
+  --font-size-2xl: 1.75rem;
+  --font-size-3xl: 2.25rem;
+  --font-size-display: clamp(2rem, 1.6rem + 1.6vw, 3.2rem);
+  --font-size-page-title: clamp(1.4rem, 1.2rem + 0.8vw, 2rem);
+  --font-size-metric: clamp(1.75rem, 1.5rem + 1vw, 2.5rem);
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 
-  --line-height-tight: 1.15;
-  --line-height-snug: 1.3;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.618;
+  --line-height-tight: 1.18;
+  --line-height-snug: 1.32;
+  --line-height-normal: 1.48;
+  --line-height-relaxed: 1.6;
 
   --letter-spacing-tight: -0.015em;
   --letter-spacing-normal: 0;
-  --letter-spacing-label: 0.02em;
+  --letter-spacing-label: 0.08em;
+  --letter-spacing-hacker: 0.12em;
 
   --measure: 68ch;
 
-  /* Spacing (4px base) */
+  /* ── Spacing Scale (4px base) ── */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -108,34 +122,32 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
   --space-16: 4rem;
-  --space-20: 5rem;
-  --space-24: 6rem;
 
-  /* Radius: deliberately tight, instrument-panel geometry */
+  /* ── Radii (Cut edge takes precedence) ── */
   --radius-sm: 2px;
   --radius-md: 4px;
   --radius-lg: 6px;
   --radius-xl: 8px;
   --radius-full: 9999px;
 
-  /* Elevation: borders carry most depth; shadows only for floating layers */
-  --shadow-xs: 0 1px 0 rgb(28 31 35 / 0.04);
-  --shadow-sm: 0 1px 2px rgb(28 31 35 / 0.06);
-  --shadow-md: 0 4px 12px rgb(28 31 35 / 0.08), 0 1px 2px rgb(28 31 35 / 0.06);
-  --shadow-lg: 0 12px 32px rgb(28 31 35 / 0.12);
+  /* ── Shadows ── */
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.7);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.8);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.9);
 
-  /* Motion */
-  --duration-fast: 120ms;
-  --duration-normal: 180ms;
+  /* ── Motion ── */
+  --duration-fast: 100ms;
+  --duration-normal: 160ms;
   --duration-slow: 280ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Layout */
-  --header-height: 3.5rem;
-  --sidebar-width: 15rem;
-  --container-max: 80rem;
-  --container-prose: 46rem;
+  /* ── Layout Dimensions ── */
+  --header-height: 3.75rem;
+  --sidebar-width: 15.5rem;
+  --container-max: 84rem;
+  --container-prose: 48rem;
   --gutter: var(--space-4);
 }
 
@@ -146,49 +158,58 @@
   :root { --gutter: var(--space-8); }
 }
 
-/* Dark theme: its own layered system, not an inversion */
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --color-bg: #111315;
-  --color-surface: #181b1e;
-  --color-surface-elevated: #1f2327;
-  --color-surface-interactive: #272c31;
-  --color-surface-sunken: #141618;
-  --color-text-primary: #e8e6e1;
-  --color-text-secondary: #b6b3ac;
-  --color-text-muted: #8f8c86;
-  --color-text-inverse: #111315;
-  --color-border: #2d3237;
-  --color-border-subtle: #23272b;
-  --color-border-strong: #424950;
-  --color-primary: #6fb3bc;
-  --color-primary-hover: #87c3cb;
-  --color-primary-active: #5aa0a9;
-  --color-primary-soft: #1b3236;
-  --color-primary-text: #8cc5cd;
-  --color-on-primary: #0d1a1c;
-  --color-accent: #e0956a;
-  --color-accent-hover: #eaa982;
-  --color-accent-soft: #33231a;
-  --color-success: #6cbf8f;
-  --color-success-soft: #172a1f;
-  --color-warning: #dcab4c;
-  --color-warning-soft: #2e2514;
-  --color-error: #e5796d;
-  --color-error-soft: #341d1a;
-  --color-info: #8aafdc;
-  --color-info-soft: #1a2433;
-  --color-focus: #87c3cb;
-  --chart-1: #3987e5;
-  --chart-2: #d95926;
-  --chart-3: #199e70;
-  --chart-grid: #262a2e;
-  --chart-axis: #3a3f45;
-  --chart-band-opacity: 0.22;
-  --shadow-xs: 0 1px 0 rgb(0 0 0 / 0.3);
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-  --shadow-md: 0 6px 16px rgb(0 0 0 / 0.45);
-  --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.55);
+/* ── Light Mode (Daylight Tactical Cyber Deck) ── */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --color-bg: #f2f7f5;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #e8f2ee;
+  --color-surface-interactive: #d9e9e3;
+  --color-surface-sunken: #e2ede8;
+
+  --color-text-primary: #051a14;
+  --color-text-secondary: #275249;
+  --color-text-muted: #537d74;
+  --color-text-inverse: #ffffff;
+
+  --color-border: #b8d9cf;
+  --color-border-subtle: #d0e7e0;
+  --color-border-strong: #00aa66;
+
+  --color-primary: #00995c;
+  --color-primary-hover: #00b36b;
+  --color-primary-active: #00804d;
+  --color-primary-soft: rgba(0, 153, 92, 0.1);
+  --color-primary-text: #008550;
+  --color-on-primary: #ffffff;
+
+  --color-accent: #0088cc;
+  --color-accent-hover: #0099e6;
+  --color-accent-soft: rgba(0, 136, 204, 0.1);
+
+  --color-success: #00995c;
+  --color-success-soft: rgba(0, 153, 92, 0.1);
+  --color-warning: #cc7a00;
+  --color-warning-soft: rgba(204, 122, 0, 0.1);
+  --color-error: #e6004c;
+  --color-error-soft: rgba(230, 0, 76, 0.1);
+  --color-info: #0088cc;
+  --color-info-soft: rgba(0, 136, 204, 0.1);
+
+  --color-focus: #00995c;
+
+  --chart-1: #00995c;
+  --chart-2: #cc7a00;
+  --chart-3: #0088cc;
+  --chart-grid: #d0e7e0;
+  --chart-axis: #7fa89f;
+  --chart-band-opacity: 0.16;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 @media (prefers-reduced-motion: reduce) {

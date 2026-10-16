@@ -1,8 +1,13 @@
-@import '@fontsource/ibm-plex-sans/latin-400.css';
-@import '@fontsource/ibm-plex-sans/latin-500.css';
-@import '@fontsource/ibm-plex-sans/latin-600.css';
-@import '@fontsource/ibm-plex-mono/latin-400.css';
-@import '@fontsource/ibm-plex-mono/latin-500.css';
+@import '@fontsource/chakra-petch/400.css';
+@import '@fontsource/chakra-petch/500.css';
+@import '@fontsource/chakra-petch/600.css';
+@import '@fontsource/chakra-petch/700.css';
+@import '@fontsource/orbitron/600.css';
+@import '@fontsource/orbitron/700.css';
+@import '@fontsource/orbitron/800.css';
+@import '@fontsource/share-tech-mono/400.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 @import './styles/tokens.css';
 
 @tailwind base;
@@ -17,41 +22,103 @@
 
   body {
     margin: 0;
-    background: var(--color-bg);
+    background-color: var(--color-bg);
     color: var(--color-text-primary);
     font-family: var(--font-family-sans);
     font-size: var(--font-size-base);
     line-height: var(--line-height-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
   }
 
-  h1, h2, h3, h4 {
+  /* Subtle Hollywood Hacker Terminal Raster / Phosphor Scanline Texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99;
+    background: linear-gradient(
+      rgba(0, 255, 157, 0) 50%,
+      rgba(0, 0, 0, 0.18) 50%
+    );
+    background-size: 100% 4px;
+    opacity: 0.45;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
     margin: 0;
-    font-weight: var(--font-weight-semibold);
-    letter-spacing: var(--letter-spacing-tight);
+    font-family: var(--font-family-display);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-hacker);
+    text-transform: uppercase;
     color: var(--color-text-primary);
   }
 
-  p { margin: 0; }
+  p {
+    margin: 0;
+  }
 
-  a { color: var(--color-primary-text); text-underline-offset: 0.18em; }
-  a:hover { color: var(--color-primary-hover); }
+  a {
+    color: var(--color-primary-text);
+    text-underline-offset: 0.2em;
+    transition: color var(--duration-fast) var(--ease-standard), text-shadow var(--duration-fast);
+  }
+  a:hover {
+    color: var(--color-primary-hover);
+    text-shadow: 0 0 8px rgba(0, 255, 157, 0.5);
+  }
 
-  ::selection { background: var(--color-primary-soft); color: var(--color-text-primary); }
+  ::selection {
+    background-color: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
 
-  /* Visible keyboard focus everywhere; never removed, only restyled */
   :focus-visible {
     outline: 2px solid var(--color-focus);
     outline-offset: 2px;
-    border-radius: var(--radius-sm);
   }
 
-  code, kbd, samp { font-family: var(--font-family-mono); font-size: 0.92em; }
+  code, kbd, samp {
+    font-family: var(--font-family-mono);
+    font-size: 0.9em;
+  }
 
-  table { border-collapse: collapse; }
+  table {
+    border-collapse: collapse;
+  }
 
-  .tabular { font-variant-numeric: tabular-nums; }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Cyber Deck Terminal Scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface-sunken);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border: 1px solid var(--color-border-subtle);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+    box-shadow: 0 0 8px var(--color-primary);
+  }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -64,17 +131,81 @@
 }
 
 @layer components {
-  /* Small uppercase-free label used above values and in table headers */
+  /* ── Cyber Terminal Label ── */
   .label {
+    font-family: var(--font-family-mono);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
     letter-spacing: var(--letter-spacing-label);
     color: var(--color-text-muted);
+    text-transform: uppercase;
   }
 
+  /* ── Cut-Corner Cyber Cards (Using clip-path CSS Variables) ── */
+  .cyber-cut-frame {
+    clip-path: var(--clip-cut-corner);
+    background: var(--color-border);
+    padding: 1px;
+    transition: background var(--duration-normal) var(--ease-standard),
+                box-shadow var(--duration-normal) var(--ease-standard);
+  }
+  .cyber-cut-frame:hover {
+    background: var(--color-border-strong);
+    box-shadow: var(--glow-border);
+  }
+  .cyber-cut-inner {
+    clip-path: var(--clip-cut-corner);
+    background: var(--color-surface);
+    height: 100%;
+    width: 100%;
+  }
+
+  /* Cut All 4 Corners */
+  .cyber-chamfer-frame {
+    clip-path: var(--clip-cut-all);
+    background: var(--color-border);
+    padding: 1px;
+  }
+  .cyber-chamfer-inner {
+    clip-path: var(--clip-cut-all);
+    background: var(--color-surface);
+    height: 100%;
+    width: 100%;
+  }
+
+  /* ── Cut Button ── */
+  .clip-cut-btn {
+    clip-path: var(--clip-cut-btn);
+  }
+
+  /* ── Cut Badge / Tag ── */
+  .clip-badge {
+    clip-path: var(--clip-badge);
+  }
+
+  /* ── Hacker Bracket Embellishments ── */
+  .bracket-text::before {
+    content: '[ ';
+    color: var(--color-primary);
+    opacity: 0.75;
+  }
+  .bracket-text::after {
+    content: ' ]';
+    color: var(--color-primary);
+    opacity: 0.75;
+  }
+
+  .tech-prefix::before {
+    content: '// ';
+    color: var(--color-primary);
+    opacity: 0.6;
+    font-family: var(--font-family-mono);
+  }
+
+  /* ── Hollywood Hacker Skeleton Loader ── */
   .skeleton {
-    background: var(--color-surface-interactive);
-    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-elevated);
+    clip-path: var(--clip-badge);
     position: relative;
     overflow: hidden;
   }
@@ -83,65 +214,85 @@
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, var(--color-surface), transparent);
-    opacity: 0.6;
-    animation: skeleton-sweep 1.4s var(--ease-standard) infinite;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(0, 255, 157, 0.12),
+      transparent
+    );
+    animation: skeleton-sweep 1.5s var(--ease-standard) infinite;
   }
-  @keyframes skeleton-sweep { to { transform: translateX(100%); } }
+  @keyframes skeleton-sweep {
+    to {
+      transform: translateX(100%);
+    }
+  }
 
-  .prose-body p + p { margin-top: var(--space-3); }
-  .prose-body { max-width: var(--measure); color: var(--color-text-secondary); line-height: var(--line-height-relaxed); }
-}
+  .prose-body p + p {
+    margin-top: var(--space-3);
+  }
+  .prose-body {
+    max-width: var(--measure);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-relaxed);
+  }
 
-@layer components {
-  /* Range input: thin track, solid primary thumb, clear focus ring */
+  /* ── Cyber Sliders ── */
   .range {
     -webkit-appearance: none;
     appearance: none;
     height: 1.5rem;
     background: transparent;
     cursor: pointer;
+    width: 100%;
   }
   .range::-webkit-slider-runnable-track {
     height: 4px;
-    border-radius: var(--radius-full);
-    background: var(--color-border);
+    background-color: var(--color-surface-sunken);
+    border: 1px solid var(--color-border);
   }
   .range::-moz-range-track {
     height: 4px;
-    border-radius: var(--radius-full);
-    background: var(--color-border);
+    background-color: var(--color-surface-sunken);
+    border: 1px solid var(--color-border);
   }
   .range::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    margin-top: -7px;
-    border-radius: var(--radius-full);
-    background: var(--color-primary);
-    border: 2px solid var(--color-surface);
-    box-shadow: 0 0 0 1px var(--color-primary);
-    transition: transform var(--duration-fast) var(--ease-standard);
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-top: -6px;
+    clip-path: var(--clip-badge);
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-bg);
+    box-shadow: 0 0 6px var(--color-primary);
+    transition: transform var(--duration-fast);
   }
   .range::-moz-range-thumb {
     width: 16px;
     height: 16px;
-    border-radius: var(--radius-full);
-    background: var(--color-primary);
-    border: 2px solid var(--color-surface);
+    clip-path: var(--clip-badge);
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-bg);
+    box-shadow: 0 0 6px var(--color-primary);
   }
-  .range:active::-webkit-slider-thumb { transform: scale(1.1); }
-  .range:focus-visible { outline: none; }
-  .range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-focus); }
-  .range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-focus); }
+  .range:active::-webkit-slider-thumb {
+    transform: scale(1.2);
+  }
+  .range:focus-visible {
+    outline: none;
+  }
+  .range:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 8px var(--color-focus);
+  }
 
+  /* ── Cyber Select ── */
   select.select {
     -webkit-appearance: none;
     appearance: none;
-    background-image: linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
-      linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
-    background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
-    background-size: 5px 5px, 5px 5px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 20 20' fill='%2300ff9d'%3E%3Cpolygon points='10,14 4,6 16,6'/%3E%3C/svg%3E");
+    background-position: calc(100% - 0.75rem) center;
+    background-size: 10px 10px;
     background-repeat: no-repeat;
     padding-right: 2rem;
   }

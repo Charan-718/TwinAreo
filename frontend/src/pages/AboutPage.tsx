@@ -28,9 +28,15 @@ export const AboutPage: React.FC<{ anchor?: string }> = ({ anchor }) => {
         description="What the twin is built on, how each component works, and where its limits are."
       />
 
-      <nav aria-label="On this page" className="mb-6 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+      <nav aria-label="On this page" className="mb-6 flex flex-wrap gap-2 text-xs font-mono">
         {[['data', 'Dataset'], ['methods', 'Methods'], ['limitations', 'Limitations'], ['citation', 'Citation'], ['terms', 'Terms of use'], ['privacy', 'Privacy']].map(([id, label]) => (
-          <a key={id} href={`#/about#${id}`}>{label}</a>
+          <a
+            key={id}
+            href={`#/about#${id}`}
+            className="clip-cut-btn px-2.5 py-1 bg-surface-elevated text-primary border border-line hover:border-primary transition-colors"
+          >
+            [{label.toUpperCase()}]
+          </a>
         ))}
       </nav>
 

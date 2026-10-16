@@ -61,41 +61,61 @@ export const DriftPage: React.FC<{ engine: EngineDetail; onRecalibrated: () => v
         className="mb-6"
       >
         <div className="overflow-x-auto mt-4 border-t border-line">
-          <table className="w-full min-w-[40rem] text-sm">
+          <table className="w-full min-w-[40rem] text-sm font-mono">
             <thead className="bg-surface-sunken text-left">
               <tr>
-                <th scope="col" className="label font-medium h-10 px-4">Channel</th>
-                <th scope="col" className="label font-medium h-10 px-4 w-[40%]">KS statistic</th>
-                <th scope="col" className="label font-medium h-10 px-4 text-right">Wasserstein</th>
-                <th scope="col" className="label font-medium h-10 px-4 text-right">Adjusted p</th>
-                <th scope="col" className="label font-medium h-10 px-4">State</th>
+                <th scope="col" className="label font-medium h-10 px-4">{"//"} CHANNEL</th>
+                <th scope="col" className="label font-medium h-10 px-4 w-[40%]">{"//"} KS_STATISTIC</th>
+                <th scope="col" className="label font-medium h-10 px-4 text-right">{"//"} WASSERSTEIN</th>
+                <th scope="col" className="label font-medium h-10 px-4 text-right">{"//"} ADJUSTED_P</th>
+                <th scope="col" className="label font-medium h-10 px-4">{"//"} STATE</th>
               </tr>
             </thead>
             <tbody>
               {d.channels.map((c) => {
                 const over = c.ks_stat > d.threshold && c.p_value_adjusted < 0.05;
                 return (
-                  <tr key={c.sensor} className="border-t border-line-subtle">
-                    <th scope="row" className="h-11 px-4 text-left font-medium">{channelLabel(c.sensor)}</th>
+                  <tr key={c.sensor} className="border-t border-line-subtle hover:bg-surface-interactive/40 transition-colors">
+                    <th scope="row" className="h-11 px-4 text-left font-medium text-fg">
+                      <span className="text-primary/70 mr-1">{"//"}</span>{channelLabel(c.sensor)}
+                    </th>
                     <td className="px-4">
                       <div className="flex items-center gap-3">
-                        <div className="relative flex-1 h-2 rounded-full bg-surface-interactive">
-                          <div className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${(c.ks_stat / maxKs) * 100}%` }} />
-                          <div className="absolute -inset-y-1 w-px bg-fg-muted" style={{ left: `${(d.threshold / maxKs) * 100}%` }} aria-hidden="true" />
+                        <div
+                          className="relative flex-1 h-2.5 bg-surface-sunken border border-line-subtle p-0.5"
+                          style={{ clipPath: 'var(--clip-badge)' }}
+                        >
+                          <div
+                            className="h-full"
+                            style={{
+                              width: `${Math.min(100, (c.ks_stat / maxKs) * 100)}%`,
+                              clipPath: 'var(--clip-badge)',
+                              backgroundColor: over ? 'var(--color-danger)' : 'var(--color-primary)',
+                              boxShadow: over ? '0 0 8px rgba(255, 0, 85, 0.7)' : '0 0 6px rgba(0, 255, 157, 0.5)',
+                            }}
+                          />
+                          <div
+                            className="absolute -top-1 -bottom-1 w-0.5 bg-accent z-10 shadow-[0_0_4px_var(--color-accent)]"
+                            style={{ left: `${(d.threshold / maxKs) * 100}%` }}
+                            aria-hidden="true"
+                            title={`Threshold: ${d.threshold.toFixed(3)}`}
+                          />
                         </div>
-                        <span className="font-mono tabular w-12 text-right">{c.ks_stat.toFixed(3)}</span>
+                        <span className="font-mono tabular w-12 text-right text-xs text-fg-secondary font-semibold">{c.ks_stat.toFixed(3)}</span>
                       </div>
                     </td>
-                    <td className="px-4 text-right font-mono tabular">{c.wasserstein_dist.toFixed(3)}</td>
-                    <td className="px-4 text-right font-mono tabular">{c.p_value_adjusted < 0.0001 ? '<0.0001' : c.p_value_adjusted.toFixed(4)}</td>
-                    <td className="px-4">{over ? <Tag tone="warning">Shifted</Tag> : <Tag tone="neutral">Within</Tag>}</td>
+                    <td className="px-4 text-right font-mono tabular text-fg-secondary">{c.wasserstein_dist.toFixed(3)}</td>
+                    <td className="px-4 text-right font-mono tabular text-fg-secondary">{c.p_value_adjusted < 0.0001 ? '<0.0001' : c.p_value_adjusted.toFixed(4)}</td>
+                    <td className="px-4">{over ? <Tag tone="danger">DRIFT_ALERT</Tag> : <Tag tone="neutral">NOMINAL</Tag>}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
-        <p className="px-4 md:px-5 py-3 text-xs text-fg-muted border-t border-line-subtle">The vertical tick on each bar marks the alarm threshold.</p>
+        <p className="px-4 md:px-5 py-3 text-xs text-fg-muted border-t border-line-subtle font-mono">
+          <span className="text-accent font-bold mr-1">{"//"} NOTE:</span> The vertical tick on each gauge marks the alarm threshold.
+        </p>
       </Panel>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -112,11 +132,13 @@ export const DriftPage: React.FC<{ engine: EngineDetail; onRecalibrated: () => v
           </div>
           {engine.calibration_log.length > 0 && (
             <div className="mt-5">
-              <p className="label mb-2">Checks this session</p>
-              <ul className="list-none p-0 m-0 divide-y divide-line-subtle text-sm">
+              <p className="label mb-2">{"//"} CHECKS_THIS_SESSION</p>
+              <ul className="list-none p-0 m-0 divide-y divide-line-subtle text-xs font-mono">
                 {engine.calibration_log.slice().reverse().map((l, i) => (
                   <li key={i} className="py-2 flex justify-between gap-4">
-                    <span className="text-fg-secondary">{l.escalated ? 'Escalated to 95% bound' : 'No change needed'}</span>
+                    <span className={l.escalated ? 'text-danger font-semibold' : 'text-fg-secondary'}>
+                      {l.escalated ? '[ESCALATED_95%]' : '[NOMINAL_BOUND]'}
+                    </span>
                     <span className="font-mono tabular text-fg-muted">score {l.drift_score == null ? '–' : l.drift_score.toFixed(3)}</span>
                   </li>
                 ))}

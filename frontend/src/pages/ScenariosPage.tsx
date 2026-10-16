@@ -109,8 +109,13 @@ export const ScenariosPage: React.FC<{ engine: EngineDetail }> = ({ engine }) =>
               </Panel>
 
               <Panel title="Assumptions behind this surrogate">
-                <ul className="list-disc pl-5 space-y-1.5 text-sm text-fg-secondary m-0">
-                  {result.assumptions.map((a) => <li key={a}>{a}</li>)}
+                <ul className="space-y-2 text-xs md:text-sm text-fg-secondary m-0 list-none p-0 font-mono">
+                  {result.assumptions.map((a, i) => (
+                    <li key={a} className="flex items-start gap-2.5">
+                      <span className="text-primary font-bold shrink-0">[A0{i + 1}]</span>
+                      <span className="leading-relaxed">{a}</span>
+                    </li>
+                  ))}
                 </ul>
               </Panel>
             </div>

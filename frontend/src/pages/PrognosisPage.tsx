@@ -65,12 +65,12 @@ export const PrognosisPage: React.FC<{ engine: EngineDetail }> = ({ engine }) =>
             <p className="p-5 text-sm text-fg-muted">Benchmark results are unavailable. Run <code>python3 ml/train_and_evaluate.py</code>.</p>
           ) : (
             <div className="overflow-x-auto mt-4 border-t border-line">
-              <table className="w-full min-w-[32rem] text-sm">
+              <table className="w-full min-w-[32rem] text-sm font-mono">
                 <thead className="bg-surface-sunken text-left">
                   <tr>
-                    <th scope="col" className="label font-medium h-10 px-4">Method</th>
-                    <th scope="col" className="label font-medium h-10 px-4 text-right">Coverage</th>
-                    <th scope="col" className="label font-medium h-10 px-4 text-right">Mean width</th>
+                    <th scope="col" className="label font-medium h-10 px-4">{"//"} METHOD</th>
+                    <th scope="col" className="label font-medium h-10 px-4 text-right">{"//"} COVERAGE</th>
+                    <th scope="col" className="label font-medium h-10 px-4 text-right">{"//"} MEAN_WIDTH</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -78,16 +78,16 @@ export const PrognosisPage: React.FC<{ engine: EngineDetail }> = ({ engine }) =>
                     const r = bench.data!.intervals[m.key][level];
                     const served = m.key === 'cqr_fleet_adapted';
                     return (
-                      <tr key={m.key} className="border-t border-line-subtle">
+                      <tr key={m.key} className="border-t border-line-subtle hover:bg-surface-interactive/40 transition-colors">
                         <th scope="row" className="px-4 py-2.5 text-left font-normal">
-                          <span className={served ? 'font-medium' : ''}>{m.name}</span>
-                          <span className="block text-xs text-fg-muted">{m.note}</span>
+                          <span className={served ? 'font-semibold text-primary' : 'text-fg'}>{served ? `[SERVED] ${m.name}` : m.name}</span>
+                          <span className="block text-xs text-fg-muted font-mono">{m.note}</span>
                         </th>
                         <td className="px-4 text-right tabular">
-                          {fmt.pct(r.empirical_coverage_pct)}
-                          <span className="block text-xs text-fg-muted">target {pct}%</span>
+                          <span className="text-fg font-semibold">{fmt.pct(r.empirical_coverage_pct)}</span>
+                          <span className="block text-xs text-fg-muted font-mono">[TARGET {pct}%]</span>
                         </td>
-                        <td className="px-4 text-right tabular">{fmt.num(r.mpiw_cycles, 1)} cycles</td>
+                        <td className="px-4 text-right tabular text-fg-secondary font-mono">{fmt.num(r.mpiw_cycles, 1)} cycles</td>
                       </tr>
                     );
                   })}

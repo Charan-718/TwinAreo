@@ -10,18 +10,37 @@ import { fmt } from '../lib/format';
 import { EngineDetail } from '../lib/types';
 import { useAsync } from '../lib/useAsync';
 
-const Meter: React.FC<{ label: string; value: number; max: number }> = ({ label, value, max }) => (
-  <div>
-    <div className="flex justify-between text-sm mb-1.5">
-      <span>{label}</span>
-      <span className="font-mono tabular">{value.toFixed(2)}</span>
+const Meter: React.FC<{ label: string; value: number; max: number }> = ({ label, value, max }) => {
+  const pct = Math.min(100, (value / max) * 100);
+  return (
+    <div>
+      <div className="flex justify-between text-xs mb-1.5 font-mono">
+        <span className="text-fg-secondary uppercase tracking-wider font-semibold">
+          <span className="text-primary/70 mr-1">{"//"}</span>{label}
+        </span>
+        <span className="tabular text-primary font-bold">{value.toFixed(2)}</span>
+      </div>
+      <div
+        className="h-2.5 bg-surface-sunken p-0.5 border border-line-subtle relative overflow-hidden"
+        style={{ clipPath: 'var(--clip-badge)' }}
+        role="meter"
+        aria-label={label}
+        aria-valuenow={value}
+        aria-valuemin={0}
+        aria-valuemax={max}
+      >
+        <div
+          className="h-full bg-primary transition-[width] duration-slow"
+          style={{
+            width: `${pct}%`,
+            clipPath: 'var(--clip-badge)',
+            boxShadow: '0 0 10px rgba(0, 255, 157, 0.6)',
+          }}
+        />
+      </div>
     </div>
-    <div className="h-2 rounded-full bg-surface-interactive overflow-hidden" role="meter" aria-label={label}
-      aria-valuenow={value} aria-valuemin={0} aria-valuemax={max}>
-      <div className="h-full rounded-full bg-primary transition-[width] duration-slow" style={{ width: `${Math.min(100, (value / max) * 100)}%` }} />
-    </div>
-  </div>
-);
+  );
+};
 
 export const DiagnosticsPage: React.FC<{ engine: EngineDetail }> = ({ engine }) => {
   const exp = useAsync(() => api.experiments(), []);
@@ -79,14 +98,16 @@ export const DiagnosticsPage: React.FC<{ engine: EngineDetail }> = ({ engine }) 
           {engine.active_anomalies.length === 0 ? (
             <p className="text-sm text-fg-muted">No channel has shifted by more than one standard deviation.</p>
           ) : (
-            <ul className="list-none p-0 m-0 divide-y divide-line-subtle">
+            <ul className="list-none p-0 m-0 divide-y divide-line-subtle font-mono">
               {engine.active_anomalies.map((a) => (
                 <li key={a.component} className="py-2.5 flex items-start justify-between gap-4">
                   <span className="min-w-0">
-                    <span className="text-sm font-medium block">{channelLabel(a.component)}</span>
-                    <span className="text-xs text-fg-muted">{a.description}</span>
+                    <span className="text-sm font-semibold block text-fg">
+                      <span className="text-primary/70 mr-1.5">{"//"}</span>{channelLabel(a.component)}
+                    </span>
+                    <span className="text-xs text-fg-muted font-mono">{a.description}</span>
                   </span>
-                  <Tag tone={a.severity === 'HIGH' ? 'danger' : 'warning'}>{a.severity === 'HIGH' ? 'Large' : 'Moderate'}</Tag>
+                  <Tag tone={a.severity === 'HIGH' ? 'danger' : 'warning'}>{a.severity === 'HIGH' ? 'CRIT_SHIFT' : 'MOD_SHIFT'}</Tag>
                 </li>
               ))}
             </ul>

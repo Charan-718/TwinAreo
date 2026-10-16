@@ -43,6 +43,7 @@ module.exports = {
       chart: { 1: v('chart-1'), 2: v('chart-2'), 3: v('chart-3'), grid: v('chart-grid'), axis: v('chart-axis') },
     },
     fontFamily: {
+      display: v('font-family-display'),
       sans: v('font-family-sans'),
       mono: v('font-family-mono'),
     },

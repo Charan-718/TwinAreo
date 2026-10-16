@@ -11,14 +11,16 @@ import { Experiments, TestPrediction } from '../lib/types';
 import { useAsync } from '../lib/useAsync';
 
 const Th: React.FC<{ children: React.ReactNode; right?: boolean }> = ({ children, right }) => (
-  <th scope="col" className={`label font-medium h-10 px-4 whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}>{children}</th>
+  <th scope="col" className={`label font-medium h-10 px-4 whitespace-nowrap font-mono tracking-wider ${right ? 'text-right' : 'text-left'}`}>
+    <span className="text-primary/70 mr-1">{"//"}</span>{children}
+  </th>
 );
 const Td: React.FC<{ children: React.ReactNode; right?: boolean; strong?: boolean }> = ({ children, right, strong }) => (
-  <td className={`px-4 py-2.5 ${right ? 'text-right tabular' : ''} ${strong ? 'font-medium' : ''}`}>{children}</td>
+  <td className={`px-4 py-2.5 font-mono ${right ? 'text-right tabular' : ''} ${strong ? 'font-medium text-fg' : 'text-fg-secondary'}`}>{children}</td>
 );
 const Table: React.FC<{ minWidth: string; children: React.ReactNode }> = ({ minWidth, children }) => (
   <div className="overflow-x-auto mt-4 border-t border-line">
-    <table className="w-full text-sm" style={{ minWidth }}>{children}</table>
+    <table className="w-full text-sm font-mono" style={{ minWidth }}>{children}</table>
   </div>
 );
 
@@ -77,8 +79,13 @@ export const EvaluationPage: React.FC = () => {
       />
 
       <Panel title="Key findings" className="mb-6">
-        <ol className="list-decimal pl-5 space-y-2 text-sm text-fg-secondary m-0 max-w-measure">
-          {findings(e).map((f) => <li key={f}>{f}</li>)}
+        <ol className="list-none p-0 space-y-2 text-xs md:text-sm text-fg-secondary m-0 max-w-measure font-mono">
+          {findings(e).map((f, i) => (
+            <li key={f} className="flex items-start gap-2.5">
+              <span className="text-primary font-bold shrink-0">[0{i + 1}]</span>
+              <span className="leading-relaxed">{f}</span>
+            </li>
+          ))}
         </ol>
       </Panel>
 
