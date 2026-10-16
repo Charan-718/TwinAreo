@@ -4,6 +4,7 @@ import { ThemePreference, useTheme } from '../../lib/theme';
 import { EngineSummary } from '../../lib/types';
 import { Icon } from '../ui/Icon';
 import { Segmented } from '../ui/Segmented';
+import { AeroTwinIcon } from '../ui/AeroTwinIcon';
 
 interface NavItem {
   label: string;
@@ -272,13 +273,8 @@ export const AppShell: React.FC<AppShellProps> = ({
                 <span className="w-2 h-px bg-primary/50" />
               </div>
 
-              {/* Cut-Angle Hexagon Turbine Emblem */}
-              <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true" className="shrink-0 drop-shadow-[0_0_8px_rgba(0,255,157,0.4)]">
-                <polygon points="16,2 29,8 29,24 16,30 3,24 3,8" fill="var(--color-surface-elevated)" stroke="var(--color-primary)" strokeWidth="1.5" />
-                <circle cx="16" cy="16" r="7" stroke="var(--color-primary)" strokeWidth="1.25" strokeDasharray="3 2" />
-                <polygon points="16,9 21,16 16,23 11,16" fill="var(--color-error)" />
-                <circle cx="16" cy="16" r="2.5" fill="var(--color-primary)" />
-              </svg>
+              {/* AeroTwin Hybrid Physical & Digital Twin Icon */}
+              <AeroTwinIcon className="h-7 w-14 shrink-0 drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]" aria-hidden="true" />
 
               {/* Geometric Cut Hacker Typography */}
               <div className="flex flex-col">
