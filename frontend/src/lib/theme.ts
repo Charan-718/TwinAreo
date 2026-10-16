@@ -12,9 +12,24 @@ function readPreference(): ThemePreference {
   }
 }
 
+function updateFavicon(dark: boolean) {
+  try {
+    const link = document.querySelector<HTMLLinkElement>("link[rel*='icon']");
+    if (link) {
+      const publicUrl = process.env.PUBLIC_URL || '';
+      link.href = dark
+        ? `${publicUrl}/favicon-dark.svg`
+        : `${publicUrl}/favicon-light.svg`;
+    }
+  } catch {
+    /* DOM unavailable */
+  }
+}
+
 function apply(pref: ThemePreference) {
   const dark = pref === 'dark' || (pref === 'system' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  updateFavicon(dark);
 }
 
 export function useTheme() {

@@ -17,6 +17,10 @@
           var pref = stored === 'light' || stored === 'dark' ? stored : 'system';
           var dark = pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
           document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+          var link = document.querySelector("link[rel*='icon']");
+          if (link) {
+            link.href = dark ? '%PUBLIC_URL%/favicon-dark.svg' : '%PUBLIC_URL%/favicon-light.svg';
+          }
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'dark');
         }

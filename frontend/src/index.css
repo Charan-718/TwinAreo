@@ -18,6 +18,8 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
   }
 
   body {
@@ -295,5 +297,8 @@
     background-size: 10px 10px;
     background-repeat: no-repeat;
     padding-right: 2rem;
+  }
+  :root[data-theme='light'] select.select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 20 20' fill='%23d97706'%3E%3Cpolygon points='10,14 4,6 16,6'/%3E%3C/svg%3E");
   }
 }

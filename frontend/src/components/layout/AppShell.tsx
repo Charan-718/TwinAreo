@@ -136,11 +136,12 @@ const ThemeControl: React.FC = () => {
       label="Color theme"
       value={preference}
       onChange={choose}
+      equalWidth
       options={[
         {
           value: 'light',
           label: (
-            <span className="flex items-center gap-1.5 px-0.5">
+            <span className="flex items-center justify-center w-4 h-4">
               <Icon name="sun" size={13} />
               <span className="sr-only">Light</span>
             </span>
@@ -149,7 +150,7 @@ const ThemeControl: React.FC = () => {
         {
           value: 'system',
           label: (
-            <span className="flex items-center gap-1.5 px-0.5 font-mono text-[11px]">
+            <span className="flex items-center justify-center w-4 h-4 font-mono text-[10px] leading-none">
               SYS
             </span>
           ),
@@ -157,7 +158,7 @@ const ThemeControl: React.FC = () => {
         {
           value: 'dark',
           label: (
-            <span className="flex items-center gap-1.5 px-0.5">
+            <span className="flex items-center justify-center w-4 h-4">
               <Icon name="moon" size={13} />
               <span className="sr-only">Dark</span>
             </span>
@@ -182,12 +183,12 @@ const EngineSelect: React.FC<{
     });
   };
   return (
-    <label className="flex items-center gap-2 min-w-0">
-      <span className="text-[11px] font-mono text-primary uppercase tracking-wider hidden sm:inline">
+    <label className="flex items-center gap-2 shrink-0">
+      <span className="text-[11px] font-mono text-primary uppercase tracking-wider hidden sm:inline shrink-0">
         {"//"} UNIT
       </span>
       <select
-        className="select h-8 clip-cut-btn border border-line bg-surface-elevated text-xs font-mono pl-3 text-fg hover:border-primary focus:border-primary shadow-xs min-w-0 max-w-[11rem]"
+        className="select h-8 w-32 sm:w-36 clip-cut-btn border border-line bg-surface-elevated text-xs font-mono pl-3 text-fg hover:border-primary focus:border-primary shadow-xs shrink-0"
         value={engineId ?? ''}
         onChange={(e) => onChange(Number(e.target.value))}
         aria-label="Select engine"
@@ -245,9 +246,9 @@ export const AppShell: React.FC<AppShellProps> = ({
       </a>
 
       {/* ─── HOLLYWOOD HACKER CYBER DECK HEADER ─── */}
-      <header className="sticky top-0 z-30 h-header border-b border-line bg-surface/90 backdrop-blur-md shadow-xs">
-        <div className="h-full flex items-center justify-between gap-3 px-gutter max-w-container mx-auto">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 h-header w-full border-b border-line bg-surface/90 backdrop-blur-md shadow-xs">
+        <div className="h-full w-full flex items-center justify-between gap-3 pl-3.5 pr-gutter max-w-container mx-auto">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               ref={menuButtonRef}
               type="button"
@@ -265,40 +266,27 @@ export const AppShell: React.FC<AppShellProps> = ({
               className="flex items-center gap-2.5 no-underline text-fg shrink-0 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
               aria-label="TwinAero, fleet status"
             >
-              {/* Left Circuit Branch (From Reference Image 1) */}
-              <div className="hidden sm:flex items-center text-primary/70 -mr-1" aria-hidden="true">
-                <span className="w-1.5 h-1.5 bg-primary/80 rotate-45" />
-                <span className="w-3 h-px bg-primary/50" />
-                <span className="w-1 h-1 bg-primary/60 inline-block" />
-                <span className="w-2 h-px bg-primary/50" />
-              </div>
-
               {/* AeroTwin Hybrid Physical & Digital Twin Icon */}
-              <AeroTwinIcon className="h-7 w-14 shrink-0 drop-shadow-[0_0_8px_rgba(255,183,3,0.35)]" aria-hidden="true" />
+              <AeroTwinIcon className="h-7 w-14 shrink-0 [filter:var(--icon-glow)]" aria-hidden="true" />
 
               {/* Geometric Cut Hacker Typography */}
-              <div className="flex flex-col">
-                <span className="text-[9px] font-mono tracking-[0.22em] text-primary/80 leading-none mb-0.5">
-                  THE // DIGITAL TWIN
-                </span>
-                <div className="flex items-center tracking-[0.12em] font-display font-black text-lg text-fg leading-none">
-                  <span className="text-fg">TWIN</span>
-                  <span className="text-primary relative" style={{ textShadow: '0 0 8px rgba(255,183,3,0.45)' }}>
-                    AER
-                    <span className="text-danger inline-block relative">
-                      O
-                      <span className="absolute -top-1 -right-1 w-1 h-1 bg-danger rotate-45" />
-                    </span>
+              <div className="flex items-center tracking-[0.12em] font-display font-black text-lg text-fg leading-none shrink-0">
+                <span className="text-fg">TWIN</span>
+                <span className="text-primary relative" style={{ textShadow: '0 0 8px rgba(255,183,3,0.45)' }}>
+                  AER
+                  <span className="text-accent inline-block relative">
+                    O
+                    <span className="absolute -top-1 -right-1 w-1 h-1 bg-accent rotate-45 shadow-[0_0_6px_var(--color-accent)]" />
                   </span>
-                </div>
+                </span>
               </div>
 
               {/* Right Circuit Branch */}
-              <div className="hidden md:flex items-center text-primary/70 ml-1" aria-hidden="true">
+              <div className="hidden md:flex items-center text-primary/70 ml-1 shrink-0" aria-hidden="true">
                 <span className="w-2 h-px bg-primary/50" />
                 <span className="w-1 h-1 bg-primary/60 inline-block" />
                 <span className="w-3 h-px bg-primary/50" />
-                <span className="w-1.5 h-1.5 bg-danger/90 rotate-45 shadow-[0_0_6px_#ff0055]" />
+                <span className="w-1.5 h-1.5 bg-accent rotate-45 shadow-[0_0_8px_var(--color-accent)]" />
               </div>
 
               {/* Telemetry Node Indicator */}
@@ -308,9 +296,9 @@ export const AppShell: React.FC<AppShellProps> = ({
             </a>
           </div>
 
-          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
+          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
             <EngineSelect route={route} engineId={engineId} fleet={fleet} />
-            <div className="hidden sm:block">
+            <div className="hidden sm:block shrink-0">
               <ThemeControl />
             </div>
           </div>

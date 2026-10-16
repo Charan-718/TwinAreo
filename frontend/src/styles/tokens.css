@@ -150,18 +150,28 @@
   --container-max: 84rem;
   --container-prose: 48rem;
   --gutter: var(--space-4);
+  --icon-glow: drop-shadow(0 0 8px rgba(255, 183, 3, 0.35));
 }
 
 @media (min-width: 768px) {
-  :root { --gutter: var(--space-6); }
+  :root,
+  :root[data-theme='dark'],
+  :root[data-theme='light'] {
+    --gutter: var(--space-6);
+  }
 }
 @media (min-width: 1280px) {
-  :root { --gutter: var(--space-8); }
+  :root,
+  :root[data-theme='dark'],
+  :root[data-theme='light'] {
+    --gutter: var(--space-8);
+  }
 }
 
 /* ── Light Mode (Daylight Tactical Cyber Deck) ── */
 :root[data-theme='light'] {
   color-scheme: light;
+  --icon-glow: none;
 
   --color-bg: #f5f4f0;
   --color-surface: #ffffff;
