@@ -13,31 +13,31 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  /* ── 60% Dominant Canvas (Aerospace Titanium Graphite Grey) ── */
-  --color-bg: #181a20;
-  --color-surface: #21252e;
-  --color-surface-elevated: #2a2f3b;
-  --color-surface-interactive: #353b4a;
-  --color-surface-sunken: #121418;
+  /* ── 60% Dominant Canvas (Industrial Battleship / Slate Graphite Grey) ── */
+  --color-bg: #4c4c4c;
+  --color-surface: #383a3e;
+  --color-surface-elevated: #44474d;
+  --color-surface-interactive: #52565e;
+  --color-surface-sunken: #2e3034;
 
-  /* ── Text Hierarchy (Carbon Titanium & Warm Silver) ── */
-  --color-text-primary: #fcfbfa;
-  --color-text-secondary: #abb1bf;
-  --color-text-muted: #6e7587;
-  --color-text-inverse: #181a20;
+  /* ── Text Hierarchy (Crisp White & Platinum Silver on Grey Canvas) ── */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #e2e4e9;
+  --color-text-muted: #b8bcc8;
+  --color-text-inverse: #1f2023;
 
   /* ── 30% Structural Cyber Borders ── */
-  --color-border: #333947;
-  --color-border-subtle: #242833;
+  --color-border: #60646e;
+  --color-border-subtle: #45474e;
   --color-border-strong: #ffb703;
 
-  /* ── 10% Actions & Solar Amber/Gold Accents (From 3D Model VTOL Rings & Edge Piping) ── */
+  /* ── 10% Actions & Solar Amber/Gold Accents ── */
   --color-primary: #ffb703;
   --color-primary-hover: #ffc72c;
   --color-primary-active: #e69500;
-  --color-primary-soft: rgba(255, 183, 3, 0.14);
-  --color-primary-text: #ffb703;
-  --color-on-primary: #080602;
+  --color-primary-soft: rgba(255, 183, 3, 0.2);
+  --color-primary-text: #ffd000;
+  --color-on-primary: #1a1a1a;
 
   /* Accent: Radiant Flame Orange (From Glowing Aerodynamic Edge Trim) */
   --color-accent: #ff7b00;

@@ -176,8 +176,8 @@
       400,248
     " />
 
-    <!-- Negative Space Cutout (Matches Dark Grey Background #181a20) -->
-    <polygon points="350,172 170,188 320,208 350,195" fill="#181a20" />
+    <!-- Negative Space Cutout (Matches Dark Grey Background #4c4c4c) -->
+    <polygon points="350,172 170,188 320,208 350,195" fill="#4c4c4c" />
 
     <!-- Inner Wing Slat (Aerodynamic Wing Root in Specular Gold) -->
     <polygon points="
@@ -196,7 +196,7 @@
     " />
 
     <!-- Left Windshield Glass Cutout (Dark Slate Grey) -->
-    <polygon points="396,140 354,172 376,210 396,210" fill="#181a20" />
+    <polygon points="396,140 354,172 376,210 396,210" fill="#4c4c4c" />
 
     <!-- Left Wing Intake -->
     <polygon points="362,175 325,225 355,232 388,185" fill="#d97706" />
@@ -206,12 +206,12 @@
     <rect x="333" y="278" width="12" height="22" rx="4" fill="#ffd000" stroke="#b45309" stroke-width="1.2" />
     <rect x="353" y="278" width="12" height="22" rx="4" fill="#ffd000" stroke="#b45309" stroke-width="1.2" />
     <rect x="339" y="284" width="20" height="6" rx="2" fill="#b45309" />
-    <circle cx="339" cy="289" r="2.5" fill="#181a20" />
-    <circle cx="359" cy="289" r="2.5" fill="#181a20" />
+    <circle cx="339" cy="289" r="2.5" fill="#4c4c4c" />
+    <circle cx="359" cy="289" r="2.5" fill="#4c4c4c" />
 
     <!-- Left Turbofan & Pods (Solid Gold Engine Nacelle) -->
     <circle cx="248" cy="242" r="27" fill="url(#gold-phys-grad)" stroke="#ffd000" stroke-width="2" />
-    <circle cx="248" cy="242" r="23" fill="#181a20" />
+    <circle cx="248" cy="242" r="23" fill="#4c4c4c" />
     <circle cx="248" cy="242" r="14" fill="#d97706" />
     <circle cx="248" cy="242" r="6" fill="#ffd000" />
     <ellipse cx="145" cy="216" rx="13" ry="16" fill="url(#gold-phys-grad)" stroke="#ffd000" stroke-width="1" />

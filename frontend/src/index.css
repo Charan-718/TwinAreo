@@ -34,7 +34,7 @@
     position: relative;
   }
 
-  /* Subtle Hollywood Hacker Terminal Raster / Phosphor Scanline Texture */
+  /* Subtle Hollywood Hacker Terminal Raster / Scanline Texture */
   body::before {
     content: '';
     position: fixed;
@@ -42,11 +42,11 @@
     pointer-events: none;
     z-index: 99;
     background: linear-gradient(
-      rgba(0, 255, 157, 0) 50%,
-      rgba(0, 0, 0, 0.18) 50%
+      rgba(0, 0, 0, 0) 50%,
+      rgba(0, 0, 0, 0.15) 50%
     );
     background-size: 100% 4px;
-    opacity: 0.45;
+    opacity: 0.35;
   }
 
   #root {

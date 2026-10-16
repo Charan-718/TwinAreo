@@ -240,19 +240,19 @@ export const AeroTwinIcon: React.FC<AeroTwinIconProps> = ({
           <g fill="url(#at-gold-phys-grad)">
             <polygon points="400,68 386,138 400,138" />
             <polygon points="400,165 350,172 30,162 22,175 140,195 220,210 310,225 350,238 400,248" />
-            <polygon points="350,172 170,188 320,208 350,195" fill="var(--color-bg, #181a20)" />
+            <polygon points="350,172 170,188 320,208 350,195" fill="var(--color-bg, #4c4c4c)" />
             <polygon points="348,172 200,186 315,202 348,192" fill="url(#at-gold-phys-specular)" />
             <polygon points="400,126 338,172 368,228 400,274" />
-            <polygon points="396,140 354,172 376,210 396,210" fill="var(--color-bg, #181a20)" />
+            <polygon points="396,140 354,172 376,210 396,210" fill="var(--color-bg, #4c4c4c)" />
             <polygon points="362,175 325,225 355,232 388,185" fill="#d97706" />
             <rect x="345" y="252" width="6" height="34" rx="2" fill="#d97706" />
             <rect x="333" y="278" width="12" height="22" rx="4" fill="#ffd000" stroke="#b45309" strokeWidth="1.2" />
             <rect x="353" y="278" width="12" height="22" rx="4" fill="#ffd000" stroke="#b45309" strokeWidth="1.2" />
             <rect x="339" y="284" width="20" height="6" rx="2" fill="#b45309" />
-            <circle cx="339" cy="289" r="2.5" fill="var(--color-bg, #181a20)" />
-            <circle cx="359" cy="289" r="2.5" fill="var(--color-bg, #181a20)" />
+            <circle cx="339" cy="289" r="2.5" fill="var(--color-bg, #4c4c4c)" />
+            <circle cx="359" cy="289" r="2.5" fill="var(--color-bg, #4c4c4c)" />
             <circle cx="248" cy="242" r="27" fill="url(#at-gold-phys-grad)" stroke="#ffd000" strokeWidth="2" />
-            <circle cx="248" cy="242" r="23" fill="var(--color-bg, #181a20)" />
+            <circle cx="248" cy="242" r="23" fill="var(--color-bg, #4c4c4c)" />
             <circle cx="248" cy="242" r="14" fill="#d97706" />
             <circle cx="248" cy="242" r="6" fill="#ffd000" />
             <ellipse cx="145" cy="216" rx="13" ry="16" fill="url(#at-gold-phys-grad)" stroke="#ffd000" strokeWidth="1" />
